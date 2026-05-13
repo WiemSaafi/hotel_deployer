@@ -15,7 +15,7 @@
 <div class="form-card">
     <form asp-action="Create" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        <asp-validation-summary class="alert-danger-custom mb-3" asp-validation-type="All" />
+        <div asp-validation-summary="All" class="alert-danger-custom mb-3" style="display:none;"></div>
         <div class="row g-3">
             <div class="col-md-6">
                 <label asp-for="Model" class="form-label">Type de chambre *</label>
