@@ -495,6 +495,13 @@ img { max-width: 100%; display: block; }
 .alert-danger-custom { background: linear-gradient(135deg, #fee2e2, #fecaca); border-left: 4px solid var(--danger); color: #991b1b; border-radius: var(--radius); padding: 1rem 1.5rem; animation: slideDown 0.5s cubic-bezier(0.4,0,0.2,1); }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Hide empty validation summaries (red square fix) */
+.alert-danger:empty, .alert-danger-custom:empty,
+.alert.alert-danger:empty,
+.validation-summary-valid { display: none !important; }
+.alert-danger-custom:not(:has(li)):not(:has(div)) { display: none !important; }
+.alert.alert-danger:not(:has(li)):not(:has(div)) { display: none !important; }
+
 /* ── Forms ───────────────────────────────────────────────────── */
 .form-card { background: #fff; border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.04); }
 .form-label { font-weight: 500; font-size: 0.8rem; letter-spacing: 0.05em; color: var(--dark); margin-bottom: 0.4rem; text-transform: uppercase; }
