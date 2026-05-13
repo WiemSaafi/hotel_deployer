@@ -301,6 +301,14 @@ namespace TunisiaStay.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
 
+            // Vérifier si le compte est actif avant de tenter la connexion
+            var userCheck = await _userManager.FindByEmailAsync(vm.Email);
+            if (userCheck != null && !userCheck.IsActive)
+            {
+                ModelState.AddModelError("", "Votre compte a été désactivé par l'administrateur. Veuillez vous réinscrire ou contacter le support.");
+                return View(vm);
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
                 vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
 

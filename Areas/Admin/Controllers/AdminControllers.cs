@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -236,7 +237,14 @@ namespace TunisiaStay.Areas.Admin.Controllers
     public class ClientsAdminController : Controller
     {
         private readonly ApplicationDbContext _ctx;
-        public ClientsAdminController(ApplicationDbContext ctx) => _ctx = ctx;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public ClientsAdminController(ApplicationDbContext ctx,
+            UserManager<ApplicationUser> userManager)
+        {
+            _ctx = ctx;
+            _userManager = userManager;
+        }
 
         public async Task<IActionResult> Index()
             => View(await _ctx.Clients.Include(c => c.Reservations).ToListAsync());
@@ -249,17 +257,47 @@ namespace TunisiaStay.Areas.Admin.Controllers
         public async Task<IActionResult> Create(ClientFormViewModel vm)
         {
             if (!ModelState.IsValid) return View(vm);
+
+            // Vérifier si l'email existe déjà
+            var existingUser = await _userManager.FindByEmailAsync(vm.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Un compte avec cet email existe déjà.");
+                return View(vm);
+            }
+
+            // Créer le compte ApplicationUser pour que le client puisse se connecter
+            var user = new ApplicationUser
+            {
+                UserName       = vm.Email,
+                Email          = vm.Email,
+                FullName       = $"{vm.Prénom} {vm.Nom}",
+                EmailConfirmed = true,
+                IsActive       = true
+            };
+
+            // Mot de passe par défaut (le client devra le changer)
+            var result = await _userManager.CreateAsync(user, "Client@123");
+            if (!result.Succeeded)
+            {
+                foreach (var e in result.Errors)
+                    ModelState.AddModelError("", e.Description);
+                return View(vm);
+            }
+            await _userManager.AddToRoleAsync(user, "User");
+
             var client = new TunisiaStay.Models.Client
             {
-                Prénom    = vm.Prénom,
-                Nom       = vm.Nom,
-                Email     = vm.Email,
-                Telephone = vm.Telephone,
-                Numéro    = vm.Numéro
+                Prénom            = vm.Prénom,
+                Nom               = vm.Nom,
+                Email             = vm.Email,
+                Telephone         = vm.Telephone,
+                Numéro            = vm.Numéro,
+                ApplicationUserId = user.Id
             };
             _ctx.Clients.Add(client);
             await _ctx.SaveChangesAsync();
-            TempData["Success"] = "Client créé avec succès.";
+            TempData["Success"] = $"Client créé avec succès. Mot de passe temporaire : Client@123";
             return RedirectToAction("Index");
         }
 
@@ -284,8 +322,20 @@ namespace TunisiaStay.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(ClientFormViewModel vm)
         {
             if (!ModelState.IsValid) return View(vm);
-            var c = await _ctx.Clients.FindAsync(vm.ClientKey);
+            var c = await _ctx.Clients.Include(x => x.ApplicationUser)
+                        .FirstOrDefaultAsync(x => x.ClientKey == vm.ClientKey);
             if (c == null) return NotFound();
+
+            // Mettre à jour aussi le compte ApplicationUser si lié
+            if (c.ApplicationUser != null)
+            {
+                c.ApplicationUser.Email    = vm.Email;
+                c.ApplicationUser.UserName = vm.Email;
+                c.ApplicationUser.NormalizedEmail    = vm.Email.ToUpper();
+                c.ApplicationUser.NormalizedUserName = vm.Email.ToUpper();
+                c.ApplicationUser.FullName = $"{vm.Prénom} {vm.Nom}";
+            }
+
             c.Prénom    = vm.Prénom;
             c.Nom       = vm.Nom;
             c.Email     = vm.Email;
@@ -299,11 +349,26 @@ namespace TunisiaStay.Areas.Admin.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var c = await _ctx.Clients.FindAsync(id);
+            var c = await _ctx.Clients.Include(x => x.ApplicationUser)
+                        .FirstOrDefaultAsync(x => x.ClientKey == id);
             if (c == null) return NotFound();
+
+            // Supprimer/désactiver le compte ApplicationUser lié
+            if (c.ApplicationUser != null)
+            {
+                // Désactiver le compte pour empêcher toute connexion
+                c.ApplicationUser.IsActive = false;
+                c.ApplicationUser.LockoutEnabled = true;
+                c.ApplicationUser.LockoutEnd = DateTimeOffset.MaxValue;
+                await _ctx.SaveChangesAsync();
+
+                // Supprimer complètement le compte Identity
+                await _userManager.DeleteAsync(c.ApplicationUser);
+            }
+
             _ctx.Clients.Remove(c);
             await _ctx.SaveChangesAsync();
-            TempData["Success"] = "Client supprimé.";
+            TempData["Success"] = "Client et son compte supprimés définitivement.";
             return RedirectToAction("Index");
         }
     }
