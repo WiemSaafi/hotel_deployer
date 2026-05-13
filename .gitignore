@@ -9,7 +9,7 @@ obj/
 *.user
 
 # SQLite DB (don't push the dev DB)
-*.db
+ 
 *.db-shm
 *.db-wal
 
