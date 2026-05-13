@@ -17,4 +17,5 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 RUN mkdir -p /app/data
 ENV ASPNETCORE_URLS=http://+:8080
+COPY TunisiaStay.db /app/data/TunisiaStay.db
 ENTRYPOINT ["dotnet", "TunisiaStay.dll"]
