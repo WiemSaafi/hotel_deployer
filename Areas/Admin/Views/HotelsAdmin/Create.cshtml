@@ -1,0 +1,94 @@
+@model TunisiaStay.ViewModels.HotelFormViewModel
+@{
+    ViewData["Title"] = "Ajouter un Hôtel";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 style="font-family:var(--ff-heading);color:var(--primary);margin:0;">
+        <i class="fas fa-plus me-2"></i>Ajouter un Hôtel
+    </h5>
+    <a asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Index" class="btn btn-sm btn-outline-primary-custom">
+        <i class="fas fa-arrow-left me-1"></i>Retour
+    </a>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <asp-validation-summary class="alert-danger-custom mb-3" asp-validation-type="All" />
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label asp-for="Name" class="form-label">Nom de l'hôtel *</label>
+                <input asp-for="Name" class="form-control" placeholder="Ex: Hôtel La Médina Tunis" />
+                <span asp-validation-for="Name" class="text-danger" style="font-size:0.78rem;"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Classification" class="form-label">Classification *</label>
+                <select asp-for="Classification" class="form-select">
+                    <option>1 étoile</option><option>2 étoiles</option><option>3 étoiles</option>
+                    <option>4 étoiles</option><option>5 étoiles</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label">Email *</label>
+                <input asp-for="Email" class="form-control" placeholder="contact@hotel.tn" />
+                <span asp-validation-for="Email" class="text-danger" style="font-size:0.78rem;"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="NumContact" class="form-label">N° Contact *</label>
+                <input asp-for="NumContact" class="form-control" placeholder="71234567" />
+                <span asp-validation-for="NumContact" class="text-danger" style="font-size:0.78rem;"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="City" class="form-label">Ville *</label>
+                <select asp-for="City" class="form-select">
+                    <option value="">Choisir…</option>
+                    @foreach (var c in new[] {"Tunis","Sousse","Djerba","Hammamet","Monastir","Sfax","Nabeul","Bizerte","Tabarka"})
+                    { <option value="@c">@c</option> }
+                </select>
+            </div>
+            <div class="col-12">
+                <label asp-for="Address" class="form-label">Adresse</label>
+                <input asp-for="Address" class="form-control" placeholder="15 Avenue Habib Bourguiba, Tunis" />
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Décrivez l'hôtel…"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Latitude" class="form-label">Latitude GPS</label>
+                <input asp-for="Latitude" class="form-control" type="number" step="0.0001" placeholder="36.8189" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Longitude" class="form-label">Longitude GPS</label>
+                <input asp-for="Longitude" class="form-control" type="number" step="0.0001" placeholder="10.1658" />
+            </div>
+            <div class="col-12">
+                <label asp-for="Image" class="form-label">Image de l'hôtel</label>
+                <input asp-for="Image" type="file" class="form-control" accept="image/*" onchange="previewImg(this)" />
+                <div id="imgPreview" class="mt-2"></div>
+            </div>
+        </div>
+        <div class="d-flex gap-3 mt-4">
+            <button type="submit" class="btn btn-primary-custom px-4">
+                <i class="fas fa-save me-2"></i>Ajouter
+            </button>
+            <a asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Index" class="btn btn-outline-primary-custom">Annuler</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+function previewImg(input) {
+    const p = document.getElementById('imgPreview');
+    p.innerHTML = '';
+    if (input.files && input.files[0]) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(input.files[0]);
+        img.style = 'max-height:160px;border-radius:8px;border:2px solid #e5e7eb;';
+        p.appendChild(img);
+    }
+}
+</script>
+}

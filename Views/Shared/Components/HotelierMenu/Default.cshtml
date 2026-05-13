@@ -1,0 +1,12 @@
+@model int
+
+<a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn-nav-fill nav-link position-relative">
+    <i class="fas fa-hotel me-1"></i>Mon Hôtel
+    @if (Model > 0)
+    {
+        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle"
+              style="font-size:0.65rem;padding:0.25rem 0.4rem;border-radius:50%;">
+            @Model
+        </span>
+    }
+</a>

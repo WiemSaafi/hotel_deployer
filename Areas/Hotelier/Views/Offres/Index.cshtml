@@ -1,0 +1,87 @@
+@model IEnumerable<TunisiaStay.Models.Offre>
+@{
+    ViewData["Title"] = "Mes offres";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tags me-2"></i>Offres promotionnelles — @ViewBag.HotelName</h1>
+        <div>
+            <a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Retour
+            </a>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> Créer une offre
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-tags fa-3x mb-3 text-muted"></i>
+            <p class="mb-2">Aucune offre pour le moment.</p>
+            <a asp-action="Create" class="btn btn-success">Créer la première offre</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var o in Model)
+            {
+                var enCours = o.IsActive && o.DateDebut <= DateTime.Today && o.DateFin >= DateTime.Today;
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 @(enCours ? "border-success" : "")">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="badge bg-success" style="font-size:1.5rem;">-@o.Pourcentage%</span>
+                                @if (enCours)
+                                {
+                                    <span class="badge bg-success">En cours</span>
+                                }
+                                else if (!o.IsActive)
+                                {
+                                    <span class="badge bg-secondary">Désactivée</span>
+                                }
+                                else if (o.DateFin < DateTime.Today)
+                                {
+                                    <span class="badge bg-secondary">Expirée</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">À venir</span>
+                                }
+                            </div>
+                            <h5>@o.Titre</h5>
+                            @if (!string.IsNullOrEmpty(o.Description))
+                            {
+                                <p class="text-muted small">@o.Description</p>
+                            }
+                            <div class="text-muted small mb-3">
+                                <i class="fas fa-calendar me-1"></i>
+                                Du @o.DateDebut.ToString("dd/MM/yyyy") au @o.DateFin.ToString("dd/MM/yyyy")
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Edit" asp-route-id="@o.Id" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@o.Id" method="post"
+                                      onsubmit="return confirm('Supprimer cette offre ?');">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

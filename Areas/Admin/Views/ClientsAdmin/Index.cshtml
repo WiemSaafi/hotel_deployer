@@ -1,0 +1,89 @@
+@model IEnumerable<TunisiaStay.Models.Client>
+@{
+    ViewData["Title"] = "Gestion des Clients";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:var(--ff-heading);color:var(--primary);margin:0;">Clients</h5>
+        <p style="font-size:0.82rem;color:var(--gray);margin:0;">@Model.Count() client(s) inscrit(s)</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <div style="position:relative;">
+            <input type="text" id="clientSearch" class="form-control" placeholder="Rechercher un client…"
+                   style="padding-left:2.2rem;width:220px;" oninput="filterClients(this.value)" />
+            <i class="fas fa-search" style="position:absolute;left:0.7rem;top:50%;transform:translateY(-50%);color:var(--gray);font-size:0.85rem;"></i>
+        </div>
+        <a asp-area="Admin" asp-controller="ClientsAdmin" asp-action="Create"
+           class="btn btn-primary btn-sm" style="white-space:nowrap;">
+            <i class="fas fa-plus me-1"></i>Nouveau client
+        </a>
+    </div>
+</div>
+
+<div class="form-card p-0" style="overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0" id="clientTable">
+            <thead>
+                <tr>
+                    <th>#</th><th>Nom</th><th>Email</th>
+                    <th>Téléphone</th><th>N° CIN</th><th>Réservations</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td style="font-weight:600;color:var(--gray);">@c.ClientKey</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--ff-heading);font-size:0.9rem;flex-shrink:0;">
+                                    @(c.Prénom?.Length > 0 ? c.Prénom[0].ToString().ToUpper() : "?")
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;font-size:0.9rem;">@c.Prénom @c.Nom</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-size:0.85rem;">@c.Email</td>
+                        <td style="font-size:0.85rem;">+216 @c.Telephone</td>
+                        <td style="font-size:0.85rem;color:var(--gray);">@c.Numéro</td>
+                        <td>
+                            <span class="badge" style="background:var(--primary);color:#fff;border-radius:2rem;padding:0.3rem 0.8rem;">
+                                @c.Reservations.Count
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-area="Admin" asp-controller="ClientsAdmin" asp-action="Edit"
+                                   asp-route-id="@c.ClientKey"
+                                   class="btn btn-sm btn-outline-primary" style="padding:0.3rem 0.7rem;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-area="Admin" asp-controller="ClientsAdmin" asp-action="Delete" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@c.ClientKey" />
+                                    <button class="btn btn-sm btn-danger" style="padding:0.3rem 0.7rem;"
+                                            onclick="return confirm('Supprimer ce client ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterClients(val) {
+    const v = val.toLowerCase();
+    document.querySelectorAll('#clientTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(v) ? '' : 'none';
+    });
+}
+</script>
+}

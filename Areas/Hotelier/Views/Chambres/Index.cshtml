@@ -1,0 +1,72 @@
+@model IEnumerable<TunisiaStay.Models.Chambre>
+@{
+    ViewData["Title"] = "Mes chambres";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Chambres de @ViewBag.HotelName</h1>
+        <a asp-action="Create" class="btn btn-success">+ Ajouter une chambre</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Modèle</th>
+                    <th>Surface</th>
+                    <th>Capacité</th>
+                    <th>Étage</th>
+                    <th>Prix / nuit</th>
+                    <th>Disponible</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td><strong>@c.Model</strong></td>
+                        <td>@c.Surface m²</td>
+                        <td>@c.Capacite pers.</td>
+                        <td>@c.Etage</td>
+                        <td>@c.PrixParNuit.ToString("N0") DT</td>
+                        <td>
+                            @if (c.Disponible)
+                            {
+                                <span class="badge bg-success">Oui</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Non</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@c.IdChambre"
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@c.IdChambre"
+                                  method="post" style="display:inline"
+                                  onsubmit="return confirm('Supprimer cette chambre ?');">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary mt-3">
+        <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord
+    </a>
+</div>

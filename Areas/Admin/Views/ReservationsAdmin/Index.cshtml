@@ -1,0 +1,108 @@
+@model IEnumerable<TunisiaStay.Models.Reservation>
+@{
+    ViewData["Title"] = "Gestion des Réservations";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:var(--ff-heading);color:var(--primary);margin:0;">Réservations</h5>
+        <p style="font-size:0.82rem;color:var(--gray);margin:0;">@Model.Count() réservation(s)</p>
+    </div>
+    <!-- Filter tabs -->
+    <div class="d-flex gap-2">
+        @foreach (var s in new[] { ("Tous",""), ("En attente","En attente"), ("Confirmée","Confirmée"), ("Annulée","Annulée") })
+        {
+            <button class="btn btn-sm @(s.Item2 == "" ? "btn-primary-custom" : "btn-outline-primary-custom")"
+                    onclick="filterRows('@s.Item2')">@s.Item1</button>
+        }
+    </div>
+</div>
+
+<div class="form-card p-0" style="overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0" id="reservTable">
+            <thead>
+                <tr>
+                    <th>#</th><th>Client</th><th>Chambre / Hôtel</th>
+                    <th>Arrivée</th><th>Départ</th><th>Prix</th>
+                    <th>Paiement</th><th>Statut</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr data-statut="@r.Statut">
+                        <td style="font-weight:700;color:var(--primary);">#@r.Id</td>
+                        <td>
+                            <div style="font-weight:600;font-size:0.88rem;">@r.Client?.Prénom @r.Client?.Nom</div>
+                            <div style="font-size:0.75rem;color:var(--gray);">@r.Client?.Email</div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.88rem;font-weight:600;">@r.Chambre?.Model</div>
+                            <div style="font-size:0.75rem;color:var(--gray);">@r.Chambre?.Hotel?.Name</div>
+                        </td>
+                        <td style="font-size:0.85rem;">@r.Date.ToString("dd/MM/yyyy")</td>
+                        <td style="font-size:0.85rem;">@r.DateFin.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <span style="font-weight:700;color:var(--primary);">@r.Prix.ToString("N0") DT</span>
+                            <div style="font-size:0.72rem;color:var(--gray);">@r.Durée nuit(s)</div>
+                        </td>
+                        <td>
+                            @if (r.Paiement != null)
+                            {
+                                <span style="font-size:0.78rem;">@r.Paiement.Méthode</span><br>
+                                <span class="badge-statut @r.Paiement.Statut.ToLower().Replace(" ","-")" style="font-size:0.7rem;">
+                                    @r.Paiement.Statut
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge-statut @r.Statut.ToLower().Replace(" ", "-")">@r.Statut</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                @if (r.Statut == "En attente")
+                                {
+                                    <form asp-area="Admin" asp-controller="ReservationsAdmin" asp-action="UpdateStatus" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <input type="hidden" name="statut" value="Confirmée" />
+                                        <button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;">
+                                            <i class="fas fa-check"></i> Confirmer
+                                        </button>
+                                    </form>
+                                    <form asp-area="Admin" asp-controller="ReservationsAdmin" asp-action="UpdateStatus" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <input type="hidden" name="statut" value="Annulée" />
+                                        <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;">
+                                            <i class="fas fa-times"></i> Annuler
+                                        </button>
+                                    </form>
+                                }
+                                <form asp-area="Admin" asp-controller="ReservationsAdmin" asp-action="Delete" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button class="btn btn-sm btn-danger" style="padding:0.3rem 0.6rem;"
+                                            onclick="return confirm('Supprimer la réservation #@r.Id ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterRows(statut) {
+    document.querySelectorAll('#reservTable tbody tr').forEach(row => {
+        row.style.display = (!statut || row.dataset.statut === statut) ? '' : 'none';
+    });
+}
+</script>
+}

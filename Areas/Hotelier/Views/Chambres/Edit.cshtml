@@ -1,0 +1,57 @@
+@model TunisiaStay.Models.Chambre
+@{
+    ViewData["Title"] = "Modifier chambre";
+}
+
+<div class="container py-5">
+    <h1>Modifier — @ViewBag.HotelName</h1>
+
+    <form asp-action="Edit" method="post" class="mt-4">
+        @Html.AntiForgeryToken()
+        <input asp-for="IdChambre" type="hidden" />
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Model" class="form-label">Type</label>
+            <input asp-for="Model" class="form-control" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="Surface" class="form-label">Surface (m²)</label>
+                <input asp-for="Surface" type="number" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Capacite" class="form-label">Capacité</label>
+                <input asp-for="Capacite" type="number" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Etage" class="form-label">Étage</label>
+                <input asp-for="Etage" type="number" class="form-control" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PrixParNuit" class="form-label">Prix par nuit (DT)</label>
+            <input asp-for="PrixParNuit" type="number" step="0.01" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ImagePath" class="form-label">URL Image</label>
+            <input asp-for="ImagePath" class="form-control" />
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="Disponible" class="form-check-input" />
+            <label asp-for="Disponible" class="form-check-label">Disponible</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>

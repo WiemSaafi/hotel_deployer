@@ -1,0 +1,73 @@
+@model IEnumerable<TunisiaStay.Models.Reservation>
+@{
+    ViewData["Title"] = "Mes Réservations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fas fa-calendar-check me-2"></i>Mes Réservations</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  @if (!Model.Any())
+  {
+    <div class="text-center py-5">
+      <i class="fas fa-calendar-times" style="font-size:4rem;color:#d1d5db;display:block;margin-bottom:1rem;"></i>
+      <h5 style="color:var(--gray);">Aucune réservation pour le moment</h5>
+      <a asp-area="" asp-controller="Hotels" asp-action="Index" class="btn btn-primary-custom mt-3">Parcourir les hôtels</a>
+    </div>
+  }
+  else
+  {
+    <div class="row g-4">
+      @foreach (var r in Model)
+      {
+        <div class="col-12">
+          <div class="form-card" style="border-left:4px solid @(r.Statut == "Confirmée" ? "var(--success)" : r.Statut == "Annulée" ? "var(--danger)" : "var(--warning)");">
+            <div class="row align-items-center">
+              <div class="col-md-2 text-center">
+                <div style="font-family:var(--ff-heading);font-size:2rem;color:var(--primary);">#@r.Id</div>
+                <span class="badge-statut @r.Statut.ToLower().Replace(" ", "-")">@r.Statut</span>
+              </div>
+              <div class="col-md-5">
+                <h5 style="font-family:var(--ff-heading);font-size:1.1rem;margin-bottom:0.3rem;">@r.Chambre?.Model</h5>
+                <p style="font-size:0.85rem;color:var(--gray);margin:0;">
+                  <i class="fas fa-hotel me-1"></i>@r.Chambre?.Hotel?.Name — @r.Chambre?.Hotel?.City
+                </p>
+                <p style="font-size:0.82rem;color:var(--gray);margin-top:0.3rem;">
+                  <i class="fas fa-calendar me-1"></i>@r.Date.ToString("dd/MM/yyyy") → @r.DateFin.ToString("dd/MM/yyyy")
+                  <span class="ms-2">(@r.Durée nuit(s))</span>
+                </p>
+              </div>
+              <div class="col-md-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:var(--primary);font-family:var(--ff-heading);">
+                  @r.Prix.ToString("N0") DT
+                </div>
+                @if (r.Paiement != null)
+                {
+                  <span style="font-size:0.78rem;color:var(--gray);">
+                    @r.Paiement.Méthode — @r.Paiement.Statut
+                  </span>
+                }
+              </div>
+              <div class="col-md-2 text-end">
+                @if (r.Statut == "En attente")
+                {
+                  <form asp-action="Cancel" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Annuler cette réservation ?')">
+                      <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                  </form>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

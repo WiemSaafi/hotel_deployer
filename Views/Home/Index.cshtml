@@ -1,0 +1,323 @@
+@model IEnumerable<TunisiaStay.Models.Hotel>
+    @{
+    ViewData["Title"] = "Accueil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    <!-- ══════════════════════════════════════════════════════
+         HERO — Animated full-screen with floating orbs
+    ══════════════════════════════════════════════════════ -->
+    <section class="hero-video-section">
+        <div class="hero-video-bg"></div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-overlay"></div>
+
+        <!-- Floating hotel images -->
+        <div style="position:absolute;right:5%;top:15%;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:12px;width:380px;opacity:0;animation:fadeIn 1.2s 0.6s ease forwards;" class="d-none d-xl-grid">
+            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80"
+                 style="width:100%;height:180px;object-fit:cover;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);" alt="hotel" />
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80"
+                 style="width:100%;height:180px;object-fit:cover;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:30px;" alt="hotel" />
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"
+                 style="width:100%;height:160px;object-fit:cover;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:-15px;" alt="hotel" />
+            <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=80"
+                 style="width:100%;height:160px;object-fit:cover;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:15px;" alt="hotel" />
+        </div>
+
+        <div class="container hero-content" style="padding-top:80px;padding-bottom:160px;">
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="hero-eyebrow" style="opacity:1;animation:none;">✦ Hôtels de Luxe · Tunisie ✦</div>
+                    <h1 class="hero-title">
+                        Bienvenue en<br><em>Tunisie</em><br>Séjours d'Exception
+                    </h1>
+                    <p class="hero-subtitle">
+                        Des médinas de Tunis aux plages dorées de Djerba, vivez une expérience hôtelière unique où chaleur tunisienne et luxe raffiné se rencontrent.
+                    </p>
+                    <div class="hero-actions">
+                        <a asp-controller="Hotels" asp-action="Index" class="btn btn-accent-custom">
+                            Découvrir nos hôtels
+                        </a>
+
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="d-flex gap-4 mt-5" style="opacity:0;animation:fadeUp 0.8s 1s ease forwards;">
+                        @foreach (var (num, label) in new[] { ("4+","Hôtels"), ("9+","Chambres"), ("100%","Luxe") })
+          {
+                        <div>
+                            <div style="font-family:var(--ff-heading);font-size:2rem;font-weight:600;color:var(--accent);">@num</div>
+                            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.5);">@label</div>
+                        </div>
+          }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search pill floating over bottom -->
+        <div class="hero-search" style="position:absolute;bottom:-28px;left:0;right:0;z-index:10;">
+            <div class="container">
+                <form asp-area="" asp-controller="Hotels" asp-action="Index" method="get">
+                    <div class="search-pill">
+                        <div class="search-pill-item" style="min-width:140px;">
+                            <label>Destination</label>
+                            <select name="City">
+                                <option value="">Toutes les villes</option>
+                                <option>Tunis</option>
+                                <option>Djerba</option>
+                                <option>Sousse</option>
+                                <option>Hammamet</option>
+                            </select>
+                        </div>
+                        <div class="search-pill-item">
+                            <label>Arrivée</label>
+                            <input type="date" name="DateArrivee" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="search-pill-item">
+                            <label>Départ</label>
+                            <input type="date" name="DateDepart" />
+                        </div>
+                        <div class="search-pill-item" style="min-width:100px;">
+                            <label>Voyageurs</label>
+                            <select name="Capacite">
+                                <option value="">1+</option>
+                                <option value="2">2+</option>
+                                <option value="3">3+</option>
+                                <option value="4">4+</option>
+                            </select>
+                        </div>
+                        <div style="padding-left:0.5rem;">
+                            <button type="submit" style="background:var(--primary);color:#fff;border:none;border-radius:50px;width:52px;height:52px;font-size:1.1rem;cursor:pointer;transition:background 0.3s;flex-shrink:0;" onmouseover="this.style.background='var(--accent)';this.style.color='var(--dark)'" onmouseout="this.style.background='var(--primary)';this.style.color='#fff'">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- spacer for search pill -->
+    <div style="height:70px;background:var(--cream);"></div>
+    <!-- ══════════════════════════════════════════════════════
+         HOTELS EN VEDETTE
+    ══════════════════════════════════════════════════════ -->
+    <section style="padding:5rem 0 4rem;">
+        <div class="container">
+            <div class="row align-items-end mb-5">
+                <div class="col-md-7">
+                    <div class="section-eyebrow reveal">Sélection Exclusive</div>
+                    <h2 class="section-title reveal delay-1">Nos Hôtels d'Exception</h2>
+                    <p style="color:var(--fog);max-width:480px;" class="reveal delay-2">
+                        Une collection triée sur le volet des plus beaux établissements de Tunisie, des médinas historiques aux plages paradisiaques.
+                    </p>
+                </div>
+                <div class="col-md-5 text-md-end reveal delay-2">
+                    <a asp-controller="Hotels" asp-action="Index" class="btn btn-outline-primary-custom">
+                        Tous les hôtels <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var hotel in Model.Take(4))
+      {
+                <div class="col-md-6 col-lg-3 reveal">
+                    <div class="hotel-card h-100">
+                        <div class="img-wrapper">
+                            <img src="@hotel.ImagePath" alt="@hotel.Name"
+                                 onerror="this.src='https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&q=80'" />
+                            <div class="stars-badge">@hotel.Classification</div>
+                            @if (hotel.Chambres.Any())
+              {
+                            <div class="price-badge">
+                                @hotel.Chambres.Min(c => c.PrixParNuit).ToString("N0") DT
+                            </div>
+              }
+                        </div>
+                        <div class="card-body">
+                            <div class="hotel-loc"><i class="fas fa-map-marker-alt"></i> @hotel.City, Tunisie</div>
+                            <h5 class="hotel-name">@hotel.Name</h5>
+                            <p class="hotel-desc">@(hotel.Description?.Length > 90 ? hotel.Description[..90] + "…" : hotel.Description)</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span style="font-size:0.75rem;color:var(--fog);">@hotel.Chambres.Count chambre(s)</span>
+                                <a asp-controller="Hotels" asp-action="Details" asp-route-id="@hotel.Id"
+                                   class="btn btn-primary-custom" style="padding:0.5rem 1.2rem;font-size:0.75rem;">
+                                    Découvrir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+      }
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         EXPERIENCE STRIP
+    ══════════════════════════════════════════════════════ -->
+    <section style="background:var(--primary);padding:5rem 0;overflow:hidden;position:relative;">
+        <div style="position:absolute;top:-50px;right:-100px;width:400px;height:400px;border:1px solid rgba(196,163,90,0.15);border-radius:50%;"></div>
+        <div style="position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;border:1px solid rgba(196,163,90,0.1);border-radius:50%;"></div>
+        <div class="container position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <div class="section-eyebrow" style="color:var(--accent);">Notre Promesse</div>
+                    <h2 style="font-family:var(--ff-heading);font-size:2.8rem;color:#fff;font-weight:600;line-height:1.1;">
+                        Une Expérience<br><em style="color:var(--accent);">Inoubliable</em>
+                    </h2>
+                    <div class="gold-line"></div>
+                    <p style="color:rgba(255,255,255,0.7);line-height:1.9;">
+                        De la réservation au check-out, chaque détail est pensé pour sublimer votre séjour en Tunisie.
+                    </p>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        @foreach (var (icon, titre, desc) in new[] {
+            ("fa-gem","Hôtels Présélectionnés","Chaque établissement est rigoureusement audité pour garantir excellence et authenticité."),
+            ("fa-shield-alt","Réservation Sécurisée","Paiement 100% sécurisé avec confirmation instantanée et annulation flexible."),
+            ("fa-headset","Conciergerie 24/7","Notre équipe bilingue est disponible à toute heure pour sublimer votre séjour."),
+            ("fa-star","Prix Meilleur Taux","Garantie du meilleur tarif. Trouvez moins cher, nous remboursons la différence.")
+          })
+          {
+                        <div class="col-6">
+                            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(196,163,90,0.15);border-radius:4px;padding:1.5rem;transition:all 0.3s;" onmouseover="this.style.background='rgba(196,163,90,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                                <i class="fas @icon" style="color:var(--accent);font-size:1.3rem;display:block;margin-bottom:0.8rem;"></i>
+                                <h6 style="color:#fff;font-family:var(--ff-heading);font-size:1rem;margin-bottom:0.4rem;">@titre</h6>
+                                <p style="color:rgba(255,255,255,0.55);font-size:0.82rem;margin:0;line-height:1.6;">@desc</p>
+                            </div>
+                        </div>
+          }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         CHAMBRES EN VEDETTE
+    ══════════════════════════════════════════════════════ -->
+    <section style="padding:5rem 0;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <div class="section-eyebrow justify-content-center reveal">Confort & Élégance</div>
+                <h2 class="section-title reveal delay-1">Chambres d'Exception</h2>
+            </div>
+            <div class="row g-4">
+                @{
+        var allRooms = Model.SelectMany(h => h.Chambres.Where(c => c.Disponible)).Take(3).ToList();
+                }
+                @foreach (var chambre in allRooms)
+      {
+                <div class="col-md-4 reveal">
+                    <div class="room-card h-100">
+                        <div class="img-wrapper">
+                            <img src="@chambre.ImagePath" alt="@chambre.Model"
+                                 onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80'"
+                                 style="width:100%;height:210px;object-fit:cover;" />
+                        </div>
+                        <div class="card-body">
+                            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--fog);margin-bottom:0.4rem;">
+                                @chambre.Hotel?.Name — @chambre.Hotel?.City
+                            </div>
+                            <h5 style="font-family:var(--ff-heading);font-size:1.3rem;margin-bottom:0.5rem;">@chambre.Model</h5>
+                            <div class="d-flex gap-3 mb-3" style="font-size:0.78rem;color:var(--fog);">
+                                <span><i class="fas fa-ruler-combined me-1"></i>@chambre.Surface m²</span>
+                                <span><i class="fas fa-users me-1"></i>@chambre.Capacite pers.</span>
+                                <span><i class="fas fa-layer-group me-1"></i>Étage @chambre.Etage</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <div class="price-tag">@chambre.PrixParNuit.ToString("N0") DT</div>
+                                    <div style="font-size:0.72rem;color:var(--fog);">par nuit</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a asp-area="" asp-controller="Hotels" asp-action="Details" asp-route-id="@chambre.IdChambre"
+                                       class="btn btn-outline-primary-custom" style="padding:0.5rem 1rem;font-size:0.75rem;">Détails</a>
+                                    @if (User.Identity?.IsAuthenticated == true)
+                  {
+                                    <a asp-controller="Reservations" asp-action="Create" asp-route-chambreId="@chambre.IdChambre"
+                                       class="btn btn-accent-custom" style="padding:0.5rem 1rem;font-size:0.75rem;">Réserver</a>
+                  }
+                  else
+                  {
+                                    <a asp-controller="Account" asp-action="Login"
+                                       class="btn btn-accent-custom" style="padding:0.5rem 1rem;font-size:0.75rem;">Réserver</a>
+                  }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+      }
+            </div>
+            <div class="text-center mt-4">
+                <a asp-area="" asp-controller="Hotels" asp-action="Index" class="btn btn-primary-custom">
+                    <i class="fas fa-bed me-2"></i>Voir toutes les chambres
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         DESTINATIONS
+    ══════════════════════════════════════════════════════ -->
+    <section style="padding:2rem 0 5rem;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <div class="section-eyebrow justify-content-center reveal">Explorez la Tunisie</div>
+                <h2 class="section-title reveal delay-1">Destinations Phares</h2>
+            </div>
+            <div class="row g-3">
+                @{
+        var dests = new[] {
+          ("Tunis","Médina & Modernité","https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=600&q=80"),
+          ("Djerba","Île Paradisiaque","https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80"),
+          ("Sousse","Perle du Sahel","https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80"),
+          ("Hammamet","Côte d'Azur Tunisienne","https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80")
+        };
+                }
+                @foreach (var (city, label, img) in dests)
+      {
+                <div class="col-6 col-md-3 reveal">
+                    <a asp-area="" asp-controller="Hotels" asp-action="Index" asp-route-City="@city"
+                       style="display:block;border-radius:4px;overflow:hidden;position:relative;height:220px;text-decoration:none;">
+                        <img src="@img" alt="@city"
+                             onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80'"
+                             style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;" />
+                        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(13,31,24,0.85) 0%,rgba(13,31,24,0.1) 60%);"></div>
+                        <div style="position:absolute;bottom:0;left:0;padding:1.2rem;">
+                            <div style="color:#fff;font-family:var(--ff-heading);font-size:1.4rem;font-weight:600;line-height:1.1;">@city</div>
+                            <div style="color:var(--accent);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;">@label</div>
+                        </div>
+                    </a>
+                </div>
+      }
+            </div>
+        </div>
+    </section>
+
+    @section Scripts {
+        <script>
+            // Scroll reveal
+            const revealEls = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((e, i) => {
+                    if (e.isIntersecting) {
+                        setTimeout(() => e.target.classList.add('visible'), i * 80);
+                    }
+                });
+            }, { threshold: 0.1 });
+            revealEls.forEach(el => observer.observe(el));
+
+            // Navbar shrink on scroll
+            window.addEventListener('scroll', () => {
+                document.querySelector('.navbar')?.classList.toggle('scrolled', window.scrollY > 60);
+            });
+        </script>
+    }

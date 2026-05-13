@@ -1,0 +1,86 @@
+@using TunisiaStay.Models
+@model (ApplicationUser User, Client? Client)
+@{
+    ViewData["Title"] = "Mon Profil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = Model.User;
+    var client = Model.Client;
+}
+
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fas fa-user-circle me-2"></i>Mon Profil</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="form-card text-center">
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;color:#fff;font-family:var(--ff-heading);">
+          @(user.FullName?.Length > 0 ? user.FullName[0].ToString().ToUpper() : "?")
+        </div>
+        <h4 style="font-family:var(--ff-heading);">@user.FullName</h4>
+        <p style="color:var(--gray);font-size:0.88rem;">@user.Email</p>
+        <span style="background:#d1fae5;color:#065f46;border-radius:2rem;padding:0.3rem 1rem;font-size:0.78rem;font-weight:600;">
+          Utilisateur
+        </span>
+        <div class="mt-4">
+          <a asp-controller="Reservations" asp-action="MyReservations" class="btn btn-primary-custom w-100">
+            <i class="fas fa-calendar-check me-2"></i>Mes réservations
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="form-card">
+        <h5 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:1.5rem;">Informations personnelles</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div style="padding:0.8rem 1rem;background:var(--light-gray);border-radius:8px;">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);">
+                <i class="fas fa-user me-1"></i>Nom complet
+              </div>
+              <div style="font-weight:600;margin-top:0.2rem;">@user.FullName</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div style="padding:0.8rem 1rem;background:var(--light-gray);border-radius:8px;">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);">
+                <i class="fas fa-envelope me-1"></i>Email
+              </div>
+              <div style="font-weight:600;margin-top:0.2rem;">@user.Email</div>
+            </div>
+          </div>
+          @if (client != null)
+          {
+            <div class="col-md-6">
+              <div style="padding:0.8rem 1rem;background:var(--light-gray);border-radius:8px;">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);">
+                  <i class="fas fa-phone me-1"></i>Téléphone
+                </div>
+                <div style="font-weight:600;margin-top:0.2rem;">+216 @client.Telephone</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div style="padding:0.8rem 1rem;background:var(--light-gray);border-radius:8px;">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);">
+                  <i class="fas fa-id-card me-1"></i>N° CIN
+                </div>
+                <div style="font-weight:600;margin-top:0.2rem;">@client.Numéro</div>
+              </div>
+            </div>
+          }
+          <div class="col-md-6">
+            <div style="padding:0.8rem 1rem;background:var(--light-gray);border-radius:8px;">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);">
+                <i class="fas fa-calendar me-1"></i>Membre depuis
+              </div>
+              <div style="font-weight:600;margin-top:0.2rem;">@user.CreatedAt.ToString("MMMM yyyy")</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

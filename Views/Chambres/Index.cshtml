@@ -1,0 +1,202 @@
+﻿@model IEnumerable<TunisiaStay.Models.Chambre>
+    @{
+    ViewData["Title"] = "Chambres disponibles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+                      <div class="page-header">
+                          <div class="container">
+                              <h1>
+                                  <i class="fas fa-bed me-2"></i>
+                                  @if (ViewBag.HotelNom != "")
+      {
+                                  @:Chambres — @ViewBag.HotelNom
+      }
+      else
+      {
+                                  @:Toutes les Chambres
+      }
+                              </h1>
+                              <nav aria-label="breadcrumb">
+                                  <ol class="breadcrumb mt-1">
+                                      <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+                                      <li class="breadcrumb-item active">Chambres</li>
+                                  </ol>
+                              </nav>
+                          </div>
+                      </div>
+
+    <!-- ── Filtres ── -->
+    <div style="background:#fff;border-bottom:1px solid #e5e7eb;padding:1.2rem 0;">
+        <div class="container">
+            <form method="get" asp-controller="Chambres" asp-action="Index">
+                @if (ViewBag.HotelId != null)
+{
+                <input type="hidden" name="hotelId" value="@ViewBag.HotelId" />
+}
+                <div class="d-flex flex-wrap gap-3 align-items-end">
+
+                    <div>
+                        <label class="form-label">Libellé / Modèle</label>
+                        <input type="text" name="model" class="form-control form-control-sm"
+                               placeholder="Ex: Suite, Deluxe..."
+                               value="@Context.Request.Query["model"]" style="min-width:150px;" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Ville</label>
+                        <select name="city" class="form-select form-select-sm" style="min-width:120px;">
+                            <option value="">Toutes</option>
+                            <option value="Tunis">Tunis</option>
+                            <option value="Djerba">Djerba</option>
+                            <option value="Sousse">Sousse</option>
+                            <option value="Hammamet">Hammamet</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Prix min (DT)</label>
+                        <input type="number" name="min" class="form-control form-control-sm"
+                               style="min-width:110px;" placeholder="0"
+                               value="@Context.Request.Query["min"]" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Prix max (DT)</label>
+                        <input type="number" name="max" class="form-control form-control-sm"
+                               style="min-width:110px;" placeholder="1000"
+                               value="@Context.Request.Query["max"]" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Voyageurs</label>
+                        <select name="cap" class="form-select form-select-sm" style="min-width:100px;">
+                            <option value="">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Arrivée</label>
+                        <input type="date" name="arrival" class="form-control form-control-sm"
+                               value="@Context.Request.Query["arrival"]" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Départ</label>
+                        <input type="date" name="depart" class="form-control form-control-sm"
+                               value="@Context.Request.Query["depart"]" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom btn-sm">
+                            <i class="fas fa-search me-1"></i>Filtrer
+                        </button>
+                        <a asp-controller="Chambres" asp-action="Index" class="btn btn-outline-primary-custom btn-sm">
+                            <i class="fas fa-times me-1"></i>Reset
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Résultats ── -->
+    <div class="container py-5">
+        <p style="font-size:0.82rem;color:var(--fog);margin-bottom:1.5rem;">
+            <i class="fas fa-list me-1"></i>@Model.Count() chambre(s) trouvée(s)
+        </p>
+        <div class="row g-4">
+            @foreach (var chambre in Model)
+    {
+            <div class="col-md-4 fade-in-up">
+                <div class="room-card h-100">
+                    <div class="img-wrapper">
+                        @if (!string.IsNullOrEmpty(chambre.ImagePath))
+            {
+                        <img src="@chambre.ImagePath" alt="@chambre.Model"
+                             style="width:100%;height:220px;object-fit:cover;"
+                             onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80'" />
+            }
+            else
+            {
+                        <div style="height:220px;background:linear-gradient(135deg,#1a3a4a,#4a8fa0);display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-bed" style="font-size:3rem;color:rgba(255,255,255,0.2)"></i>
+                        </div>
+            }
+                    </div>
+                    <div class="card-body">
+                        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);margin-bottom:0.3rem;">
+                            <i class="fas fa-map-marker-alt me-1" style="color:var(--wine)"></i>
+                            @chambre.Hotel?.Name — @chambre.Hotel?.City
+                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+  <h5 style="font-family:var(--ff-heading);font-size:1.25rem;margin:0;">@chambre.Model</h5>
+  @if (Context.Request.Query["arrival"].Count > 0 && Context.Request.Query["depart"].Count > 0)
+  {
+    <span style="background:#d1fae5;color:#065f46;font-size:0.7rem;font-weight:600;padding:0.2rem 0.7rem;border-radius:2rem;white-space:nowrap;">
+      <i class="fas fa-check-circle me-1"></i>Disponible
+    </span>
+  }
+  else
+  {
+    @if (chambre.Disponible)
+    {
+      <span style="background:#d1fae5;color:#065f46;font-size:0.7rem;font-weight:600;padding:0.2rem 0.7rem;border-radius:2rem;">
+        <i class="fas fa-check-circle me-1"></i>Disponible
+      </span>
+    }
+    else
+    {
+      <span style="background:#fee2e2;color:#991b1b;font-size:0.7rem;font-weight:600;padding:0.2rem 0.7rem;border-radius:2rem;">
+        <i class="fas fa-times-circle me-1"></i>Indisponible
+      </span>
+    }
+  }
+</div>
+                        <div class="d-flex gap-3 mb-3" style="font-size:0.78rem;color:var(--fog);">
+                            <span><i class="fas fa-ruler-combined me-1"></i>@chambre.Surface m²</span>
+                            <span><i class="fas fa-users me-1"></i>@chambre.Capacite pers.</span>
+                            <span><i class="fas fa-layer-group me-1"></i>Étage @chambre.Etage</span>
+                        </div>
+                        @if (chambre.ChambreAmenites?.Any() == true)
+            {
+                        <div class="mb-3">
+                            @foreach (var ca in chambre.ChambreAmenites.Take(3))
+                {
+                            <span class="amenite-chip" style="font-size:0.72rem;">
+                                <i class="fas @ca.Amenite.IconClass"></i> @ca.Amenite.Nom
+                            </span>
+                }
+                        </div>
+            }
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <div class="price-tag">@chambre.PrixParNuit.ToString("N0") DT</div>
+                                <div style="font-size:0.72rem;color:var(--fog);">par nuit</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Hotels" asp-action="Details" asp-route-id="@chambre.HotelId"
+                                   class="btn btn-outline-primary-custom btn-sm">Détails</a>
+                                @if (User.Identity?.IsAuthenticated == true)
+                {
+                                <a asp-controller="Reservations" asp-action="Create"
+                                   asp-route-chambreId="@chambre.IdChambre"
+                                   class="btn btn-accent-custom btn-sm">Réserver</a>
+                }
+                else
+                {
+                                <a asp-controller="Account" asp-action="Login"
+                                   class="btn btn-accent-custom btn-sm">Réserver</a>
+                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+        </div>
+    </div>

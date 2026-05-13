@@ -1,0 +1,105 @@
+@model TunisiaStay.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Inscription";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="min-height:85vh;background:linear-gradient(135deg,var(--primary) 0%,#1e4535 50%,var(--dark) 100%);display:flex;align-items:center;padding:3rem 0;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:var(--accent);border-radius:50%;filter:blur(100px);opacity:0.15;pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:var(--wine);border-radius:50%;filter:blur(80px);opacity:0.12;pointer-events:none;"></div>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div style="background:rgba(255,255,255,0.97);border-radius:4px;padding:2.5rem;box-shadow:0 30px 80px rgba(0,0,0,0.3);border-top:3px solid var(--accent);">
+
+          <div class="text-center mb-4">
+            <div style="font-family:var(--ff-heading);font-size:2rem;color:var(--primary);font-weight:600;">Créer un Compte</div>
+            <p style="color:var(--fog);font-size:0.83rem;margin:0.3rem 0 0;letter-spacing:0.05em;">Rejoignez TunisiaStay</p>
+          </div>
+
+          @if (!ViewData.ModelState.IsValid)
+          {
+            <div style="background:#fee2e2;border-left:3px solid #dc2626;color:#991b1b;padding:0.8rem 1rem;border-radius:3px;margin-bottom:1rem;font-size:0.85rem;">
+              @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+              {
+                <div>@error.ErrorMessage</div>
+              }
+            </div>
+          }
+
+          <form method="post" action="/Account/Register">
+            @Html.AntiForgeryToken()
+
+            <div style="margin-bottom:1rem;">
+              <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">Nom Complet</label>
+              <input type="text" name="FullName"
+                     style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;transition:border-color 0.2s;"
+                     placeholder="Mohamed Ben Ali"
+                     onfocus="this.style.borderColor='var(--primary)'"
+                     onblur="this.style.borderColor='#d1d5db'" />
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">Adresse Email</label>
+              <input type="email" name="Email"
+                     style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;transition:border-color 0.2s;"
+                     placeholder="votre@email.tn"
+                     onfocus="this.style.borderColor='var(--primary)'"
+                     onblur="this.style.borderColor='#d1d5db'" />
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1rem;">
+              <div>
+                <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">Téléphone</label>
+                <input type="text" name="Telephone"
+                       style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;"
+                       placeholder="21234567"
+                       onfocus="this.style.borderColor='var(--primary)'"
+                       onblur="this.style.borderColor='#d1d5db'" />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">N° CIN</label>
+                <input type="text" name="Numéro"
+                       style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;"
+                       placeholder="12345678"
+                       onfocus="this.style.borderColor='var(--primary)'"
+                       onblur="this.style.borderColor='#d1d5db'" />
+              </div>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">Mot de Passe</label>
+              <input type="password" name="Password"
+                     style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;"
+                     placeholder="Minimum 6 caractères"
+                     onfocus="this.style.borderColor='var(--primary)'"
+                     onblur="this.style.borderColor='#d1d5db'" />
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+              <label style="display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fog);font-weight:600;margin-bottom:0.4rem;">Confirmer le Mot de Passe</label>
+              <input type="password" name="ConfirmPassword"
+                     style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:3px;font-size:0.9rem;font-family:var(--ff-body);outline:none;"
+                     placeholder="Répétez le mot de passe"
+                     onfocus="this.style.borderColor='var(--primary)'"
+                     onblur="this.style.borderColor='#d1d5db'" />
+            </div>
+
+            <button type="submit"
+                    style="width:100%;padding:0.85rem;background:var(--accent);color:var(--dark);border:none;border-radius:3px;font-size:0.82rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;"
+                    onmouseover="this.style.background='#b8922f'"
+                    onmouseout="this.style.background='var(--accent)'">
+              Créer Mon Compte
+            </button>
+          </form>
+
+          <div style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--fog);">
+            Déjà un compte ?
+            <a href="/Account/Login" style="color:var(--primary);font-weight:600;">Se connecter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

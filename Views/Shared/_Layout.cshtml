@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")TunisiaStay</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+      Tunisia<span>Stay</span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="color:rgba(255,255,255,0.7)">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto gap-1">
+        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Hotels" asp-action="Index">Hôtels</a></li>
+        @if (User.IsInRole("User"))
+        {
+          <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Reservations" asp-action="MyReservations">Mes Réservations</a></li>
+        }
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+          @if (User.IsInRole("Admin"))
+          {
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-nav-fill nav-link">
+              <i class="fas fa-tachometer-alt me-1"></i>Admin
+            </a>
+          }
+          @if (User.IsInRole("Hotelier"))
+          {
+            @await Component.InvokeAsync("HotelierMenu")
+          }
+          <a asp-area="" asp-controller="Account" asp-action="Profile" class="nav-link" style="color:rgba(255,255,255,0.75) !important;font-size:0.8rem;">
+            <i class="fas fa-user-circle me-1"></i>@User.Identity.Name?.Split('@')[0]
+          </a>
+          <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-nav-outline nav-link">Déconnexion</button>
+          </form>
+        }
+        else
+        {
+          <a asp-area="" asp-controller="Account" asp-action="Login" class="btn-nav-outline nav-link">Connexion</a>
+          <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-nav-fill nav-link">Inscription</a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>
+
+@if (TempData["Success"] != null)
+{
+  <div class="container mt-3">
+    <div class="alert-success-custom d-flex align-items-center gap-2">
+      <i class="fas fa-check-circle"></i> @TempData["Success"]
+    </div>
+  </div>
+}
+@if (TempData["Error"] != null)
+{
+  <div class="container mt-3">
+    <div class="alert-danger-custom d-flex align-items-center gap-2">
+      <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+    </div>
+  </div>
+}
+
+@RenderBody()
+
+<footer>
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="brand-footer mb-1">TunisiaStay</div>
+        <div class="footer-divider"></div>
+        <p style="font-size:0.85rem;max-width:280px;line-height:1.8;">
+          L'art de voyager en Tunisie avec élégance. Hôtels de luxe soigneusement sélectionnés de Tunis à Djerba.
+        </p>
+      </div>
+      <div class="col-md-2">
+        <h5>Destinations</h5>
+        @foreach (var city in new[] {"Tunis","Sousse","Djerba","Hammamet","Monastir"})
+        {
+          <a asp-area="" asp-controller="Hotels" asp-action="Index" asp-route-City="@city" class="footer-link">@city</a>
+        }
+      </div>
+      <div class="col-md-2">
+        <h5>Navigation</h5>
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="footer-link">Accueil</a>
+        <a asp-area="" asp-controller="Hotels" asp-action="Index" class="footer-link">Hôtels</a>
+        <a asp-area="" asp-controller="Account" asp-action="Login" class="footer-link">Connexion</a>
+        <a asp-area="" asp-controller="Account" asp-action="Register" class="footer-link">Inscription</a>
+      </div>
+      <div class="col-md-4">
+        <h5>Contact</h5>
+        <p style="font-size:0.85rem;line-height:2;">
+          <i class="fas fa-map-marker-alt me-2" style="color:var(--accent)"></i>15 Ave Habib Bourguiba, Tunis<br>
+          <i class="fas fa-phone me-2" style="color:var(--accent)"></i>+216 71 000 000<br>
+          <i class="fas fa-envelope me-2" style="color:var(--accent)"></i>contact@tunisiastay.tn
+        </p>
+        <div class="d-flex gap-3 mt-2">
+          @foreach (var (icon, _) in new[] {("fa-facebook-f",""), ("fa-instagram",""), ("fa-twitter","")})
+          {
+            <a href="#" style="width:36px;height:36px;border:1px solid rgba(196,163,90,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:0.8rem;transition:all 0.3s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='rgba(196,163,90,0.3)';this.style.color='rgba(255,255,255,0.5)'">
+              <i class="fab @icon"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">
+      © @DateTime.Now.Year TunisiaStay — Tous droits réservés · Développé avec ASP.NET Core 8
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

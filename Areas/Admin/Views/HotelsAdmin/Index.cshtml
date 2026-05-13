@@ -1,0 +1,69 @@
+@* ════════ Hotels/Index ════════ *@
+@model IEnumerable<TunisiaStay.Models.Hotel>
+@{
+    ViewData["Title"] = "Gestion des Hôtels";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:var(--ff-heading);color:var(--primary);margin:0;">Hôtels</h5>
+        <p style="font-size:0.82rem;color:var(--gray);margin:0;">@Model.Count() hôtel(s) enregistré(s)</p>
+    </div>
+    <a asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Create"
+       class="btn btn-primary-custom">
+        <i class="fas fa-plus me-2"></i>Ajouter un Hôtel
+    </a>
+</div>
+
+<div class="form-card p-0" style="overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Hôtel</th><th>Ville</th><th>Classification</th>
+                    <th>Contact</th><th>Chambres</th><th>Statut</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;color:var(--primary);">@h.Name</div>
+                            <div style="font-size:0.78rem;color:var(--gray);">@h.Email</div>
+                        </td>
+                        <td><i class="fas fa-map-marker-alt me-1" style="color:var(--terracotta)"></i>@h.City</td>
+                        <td><span style="color:var(--accent);font-weight:600;font-size:0.85rem;">@h.Classification</span></td>
+                        <td style="font-size:0.85rem;">+216 @h.NumContact</td>
+                        <td>
+                            <span class="badge" style="background:var(--primary);color:#fff;border-radius:2rem;padding:0.3rem 0.8rem;">
+                                @h.Chambres.Count
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size:0.78rem;font-weight:600;color:@(h.IsActive ? "var(--success)" : "var(--danger)");">
+                                <i class="fas fa-circle me-1" style="font-size:0.5rem;"></i>@(h.IsActive ? "Actif" : "Inactif")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Edit" asp-route-id="@h.Id"
+                                   class="btn btn-sm btn-outline-primary-custom" style="padding:0.3rem 0.7rem;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Delete" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@h.Id" />
+                                    <button class="btn btn-sm btn-danger" style="padding:0.3rem 0.7rem;"
+                                            onclick="return confirm('Supprimer @h.Name ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

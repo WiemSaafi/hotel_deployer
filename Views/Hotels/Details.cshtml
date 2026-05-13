@@ -1,0 +1,240 @@
+@using System.Globalization
+@model TunisiaStay.Models.Hotel
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1>@Model.Name</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mt-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Hotels" asp-action="Index">Hôtels</a></li>
+                <li class="breadcrumb-item active">@Model.Name</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Left column -->
+        <div class="col-lg-8">
+            <!-- Image -->
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+            <img src="@Model.ImagePath" alt="@Model.Name"
+                 style="width:100%;height:400px;object-fit:cover;border-radius:var(--radius);margin-bottom:2rem;" />
+            }
+            else
+            {
+            <div style="width:100%;height:350px;background:linear-gradient(135deg,var(--primary),#2d6a7f);border-radius:var(--radius);margin-bottom:2rem;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-hotel" style="font-size:6rem;color:rgba(255,255,255,0.15)"></i>
+            </div>
+            }
+
+            <!-- Info -->
+            <div class="form-card mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h2 style="font-family:var(--ff-heading);color:var(--primary);">@Model.Name</h2>
+                        <p style="color:var(--gray);font-size:0.9rem;margin:0;">
+                            <i class="fas fa-map-marker-alt me-1" style="color:var(--terracotta)"></i>
+                            @Model.Address — @Model.City, Tunisie
+                        </p>
+                    </div>
+                    <span style="background:var(--accent);color:var(--primary);font-weight:700;border-radius:2rem;padding:0.35rem 1rem;font-size:0.85rem;">
+                        @Model.Classification
+                    </span>
+                </div>
+                <div class="gold-line"></div>
+                <p style="color:var(--gray);line-height:1.8;">@Model.Description</p>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:40px;height:40px;background:rgba(26,58,74,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-envelope" style="color:var(--primary)"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray);">Email</div>
+                                <div style="font-size:0.85rem;font-weight:600;">@Model.Email</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:40px;height:40px;background:rgba(26,58,74,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-phone" style="color:var(--primary)"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray);">Contact</div>
+                                <div style="font-size:0.85rem;font-weight:600;">+216 @Model.NumContact</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:40px;height:40px;background:rgba(26,58,74,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-bed" style="color:var(--primary)"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray);">Chambres</div>
+                                <div style="font-size:0.85rem;font-weight:600;">@Model.Chambres.Count disponible(s)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rooms -->
+            <h4 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:1.5rem;">
+                Chambres Disponibles
+            </h4>
+            <div class="row g-3">
+                @foreach (var chambre in Model.Chambres.Where(c => c.Disponible))
+                {
+                <div class="col-md-6">
+                    <div class="room-card">
+                        <div class="room-img">
+                            @if (!string.IsNullOrEmpty(chambre.ImagePath))
+                                {
+                            <img src="@chambre.ImagePath" alt="@chambre.Model" />
+                                }
+                                else
+                                {
+                            <div style="height:200px;background:linear-gradient(135deg,#1a3a4a,#4a8fa0);display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-bed" style="font-size:3rem;color:rgba(255,255,255,0.2)"></i>
+                            </div>
+                                }
+                        </div>
+                        <div class="card-body">
+                            <h6 style="font-family:var(--ff-heading);">@chambre.Model</h6>
+                            <div class="d-flex gap-3 mb-2" style="font-size:0.78rem;color:var(--gray);">
+                                <span><i class="fas fa-ruler-combined me-1"></i>@chambre.Surface m²</span>
+                                <span><i class="fas fa-users me-1"></i>@chambre.Capacite pers.</span>
+                            </div>
+                            @if (chambre.ChambreAmenites?.Any() == true)
+                                {
+                            <div class="mb-2">
+                                @foreach (var ca in chambre.ChambreAmenites.Take(3))
+                                        {
+                                <span class="amenite-chip" style="font-size:0.72rem;">
+                                    <i class="fas @ca.Amenite.IconClass"></i>@ca.Amenite.Nom
+                                </span>
+                                        }
+                            </div>
+                                }
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div class="price-tag">@chambre.PrixParNuit.ToString("N0") DT <small>/ nuit</small></div>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                <a asp-controller="Reservations" asp-action="Create"
+                                   asp-route-chambreId="@chambre.IdChambre"
+                                   class="btn btn-sm btn-accent-custom">Réserver</a>
+                                    }
+                                    else
+                                    {
+                                <a asp-controller="Account" asp-action="Login"
+                                   class="btn btn-sm btn-accent-custom">Réserver</a>
+                                    }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Avis section -->
+            @if (Model.Avis?.Any() == true)
+            {
+            <h4 style="font-family:var(--ff-heading);color:var(--primary);margin:2.5rem 0 1.5rem;">
+                Avis des Clients
+            </h4>
+            @foreach (var avis in Model.Avis.Take(5))
+                {
+            <div class="form-card mb-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                            @avis.ApplicationUser?.FullName?.FirstOrDefault()
+                        </div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.9rem;">@avis.ApplicationUser?.FullName</div>
+                            <div style="font-size:0.75rem;color:var(--gray);">@avis.Date.ToString("dd/MM/yyyy")</div>
+                        </div>
+                    </div>
+                    <div class="stars">
+                        @for (int i = 0; i < avis.Note; i++) { <i class="fas fa-star"></i> }
+                        @for (int i = avis.Note; i < 5; i++) { <i class="far fa-star"></i> }
+                    </div>
+                </div>
+                <p style="margin-top:0.8rem;font-size:0.88rem;color:var(--gray);">@avis.Commentaire</p>
+            </div>
+                }
+            }
+        </div>
+
+        <!-- Right sidebar -->
+        <div class="col-lg-4">
+            <div class="form-card mb-3" style="position:sticky;top:90px;">
+                <h6 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:1rem;">
+                    <i class="fas fa-map-marker-alt me-2" style="color:var(--terracotta)"></i>Localisation
+                </h6>
+                <p style="font-size:0.85rem;color:var(--gray);margin-bottom:1rem;">
+                    @Model.Address<br>@Model.City, Tunisie
+                </p>
+                <div id="map" style="height:300px;width:100%;border-radius:8px;overflow:hidden;"></div>
+                <div class="mt-3"> <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(Model.Name + " " + Model.City + " Tunisie")"
+   target="_blank" class="btn btn-sm btn-outline-primary-custom w-100">
+    <i class="fas fa-external-link-alt me-1"></i>Ouvrir dans Google Maps
+</a>
+                </div>
+            </div>
+
+            @if (Model.Chambres.Any(c => c.Disponible))
+            {
+            <div class="form-card" style="border-top:4px solid var(--accent);">
+                <h6 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:0.5rem;">
+                    À partir de
+                </h6>
+                <div style="font-size:2rem;font-weight:700;color:var(--primary);font-family:var(--ff-heading);">
+                    @Model.Chambres.Min(c => c.PrixParNuit).ToString("N0") DT
+                    <span style="font-size:0.9rem;font-weight:400;color:var(--gray);">/ nuit</span>
+                </div>
+                <a asp-area="" asp-controller="Hotels" asp-action="Index" class="btn btn-primary-custom w-100 mt-3">
+                    <i class="fas fa-search me-2"></i>Voir d'autres hôtels
+                </a>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+(function() {
+  var lat = @Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+var lng = @Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+  var mapDiv = document.getElementById('map');
+  if (!lat || !lng || (lat === 0 && lng === 0)) {
+    mapDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f1f5f9;color:#94a3b8;font-size:0.9rem;border-radius:8px;"><i class=\"fas fa-map-marker-alt\" style=\"margin-right:8px\"></i>Coordonnées GPS non définies</div>';
+    return;
+  }
+  const map = L.map('map').setView([lat, lng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+  }).addTo(map);
+  const icon = L.divIcon({
+      html: '<div style="width:36px;height:36px;background:var(--primary);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><i class=\"fas fa-hotel\" style=\"transform:rotate(45deg);color:#fff;font-size:14px;\"></i></div>',
+      iconSize: [36, 36], className: ''
+  });
+  L.marker([lat, lng], { icon })
+      .addTo(map)
+      .bindPopup('<b>@Html.Raw(Model.Name.Replace("'", "\\'"))</b><br>@Html.Raw(Model.City)')
+      .openPopup();
+})();
+    </script>
+}

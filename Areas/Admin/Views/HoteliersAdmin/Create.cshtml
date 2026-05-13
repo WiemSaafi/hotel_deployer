@@ -1,0 +1,56 @@
+@model TunisiaStay.ViewModels.HotelierCreateViewModel
+@{
+    ViewData["Title"] = "Nouvel hôtelier";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user-plus me-2"></i>Créer un compte hôtelier</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+
+    <form asp-action="Create" method="post" class="card p-4" style="max-width:700px;">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label">Nom complet</label>
+            <input asp-for="FullName" class="form-control" placeholder="Mohamed Ben Ali" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input asp-for="Email" type="email" class="form-control" placeholder="hotelier@exemple.tn" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Mot de passe</label>
+            <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 caractères" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+            <small class="text-muted">L'hôtelier pourra le changer après sa première connexion.</small>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="HotelId" class="form-label">Hôtel à assigner (optionnel)</label>
+            <select asp-for="HotelId" asp-items="ViewBag.AvailableHotels" class="form-select">
+                <option value="">-- Aucun hôtel pour l'instant --</option>
+            </select>
+            <small class="text-muted">Seuls les hôtels sans propriétaire sont listés.</small>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Créer l'hôtelier
+            </button>
+        </div>
+    </form>
+</div>

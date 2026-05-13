@@ -1,0 +1,206 @@
+@model TunisiaStay.Models.Reservation
+@{
+    ViewData["Title"] = $"Réservation #{Model.Id}";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Réservation #@Model.Id</h1>
+            <p class="text-muted mb-0">
+                Créée le @Model.CreatedAt.ToString("dd/MM/yyyy à HH:mm")
+            </p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- Statut bien visible en haut -->
+    <div class="mb-4">
+        @switch (Model.Statut)
+        {
+            case "En attente":
+                <div class="alert alert-warning d-flex align-items-center">
+                    <i class="fas fa-clock fa-2x me-3"></i>
+                    <div>
+                        <strong>Réservation en attente de confirmation</strong>
+                        <div>Le client attend votre réponse.</div>
+                    </div>
+                </div>
+                break;
+            case "Confirmée":
+                <div class="alert alert-success d-flex align-items-center">
+                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                    <div>
+                        <strong>Réservation confirmée</strong>
+                        <div>Tout est validé pour le séjour du client.</div>
+                    </div>
+                </div>
+                break;
+            case "Annulée":
+                <div class="alert alert-danger d-flex align-items-center">
+                    <i class="fas fa-times-circle fa-2x me-3"></i>
+                    <div>
+                        <strong>Réservation annulée</strong>
+                    </div>
+                </div>
+                break;
+        }
+    </div>
+
+    <div class="row g-4">
+        <!-- Colonne gauche : infos client -->
+        <div class="col-md-6">
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3"><i class="fas fa-user me-2"></i>Informations client</h5>
+                @if (Model.Client != null)
+                {
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted" style="width:140px;">Nom complet</td>
+                            <td><strong>@Model.Client.Prénom @Model.Client.Nom</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Email</td>
+                            <td><a href="mailto:@Model.Client.Email">@Model.Client.Email</a></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Téléphone</td>
+                            <td><a href="tel:@Model.Client.Telephone">@Model.Client.Telephone</a></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Numéro</td>
+                            <td>@Model.Client.Numéro</td>
+                        </tr>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">Informations client indisponibles.</p>
+                }
+            </div>
+
+            <!-- Paiement -->
+            <div class="card p-4">
+                <h5 class="mb-3"><i class="fas fa-credit-card me-2"></i>Paiement</h5>
+                @if (Model.Paiement != null)
+                {
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted" style="width:140px;">Montant</td>
+                            <td><strong style="font-size:1.3rem;">@Model.Paiement.Montant.ToString("N0") DT</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Méthode</td>
+                            <td>@Model.Paiement.Méthode</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Statut</td>
+                            <td>
+                                @switch (Model.Paiement.Statut)
+                                {
+                                    case "Validé":
+                                        <span class="badge bg-success">Validé</span>
+                                        break;
+                                    case "En attente":
+                                        <span class="badge bg-warning text-dark">En attente</span>
+                                        break;
+                                    case "Remboursé":
+                                        <span class="badge bg-info">Remboursé</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@Model.Paiement.Statut</span>
+                                        break;
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Date paiement</td>
+                            <td>@Model.Paiement.DatePaiement.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <!-- Colonne droite : séjour -->
+        <div class="col-md-6">
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3"><i class="fas fa-bed me-2"></i>Chambre réservée</h5>
+                @if (Model.Chambre != null)
+                {
+                    @if (!string.IsNullOrEmpty(Model.Chambre.ImagePath))
+                    {
+                        <img src="@Model.Chambre.ImagePath" class="img-fluid rounded mb-3"
+                             style="max-height:200px;width:100%;object-fit:cover;" />
+                    }
+                    <h5>@Model.Chambre.Model</h5>
+                    <div class="text-muted mb-2">
+                        <i class="fas fa-ruler me-1"></i>@Model.Chambre.Surface m² ·
+                        <i class="fas fa-users me-1"></i>@Model.Chambre.Capacite pers. ·
+                        <i class="fas fa-layer-group me-1"></i>Étage @Model.Chambre.Etage
+                    </div>
+                    <p class="mb-0"><strong>@Model.Chambre.PrixParNuit.ToString("N0") DT</strong> / nuit</p>
+                }
+            </div>
+
+            <div class="card p-4">
+                <h5 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Dates du séjour</h5>
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted" style="width:140px;">Arrivée</td>
+                        <td><strong>@Model.Date.ToString("dddd dd MMMM yyyy")</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Départ</td>
+                        <td><strong>@Model.Date.AddDays(Model.Durée).ToString("dddd dd MMMM yyyy")</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Durée</td>
+                        <td>@Model.Durée nuit(s)</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Total</td>
+                        <td><strong style="font-size:1.2rem;color:var(--primary);">@Model.Prix.ToString("N0") DT</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions selon le statut -->
+    <div class="text-end mt-4">
+        @if (Model.Statut == "En attente")
+        {
+            <form asp-action="Confirm" asp-route-id="@Model.Id" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-success btn-lg">
+                    <i class="fas fa-check me-1"></i> Confirmer la réservation
+                </button>
+            </form>
+            <form asp-action="Refuse" asp-route-id="@Model.Id" method="post" style="display:inline"
+                  onsubmit="return confirm('Refuser cette réservation ?');">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-danger btn-lg">
+                    <i class="fas fa-times me-1"></i> Refuser
+                </button>
+            </form>
+        }
+        else if (Model.Statut == "Confirmée")
+        {
+            <form asp-action="Refuse" asp-route-id="@Model.Id" method="post" style="display:inline"
+                  onsubmit="return confirm('Annuler cette réservation déjà confirmée ?');">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-outline-danger">
+                    <i class="fas fa-ban me-1"></i> Annuler la réservation
+                </button>
+            </form>
+        }
+    </div>
+</div>

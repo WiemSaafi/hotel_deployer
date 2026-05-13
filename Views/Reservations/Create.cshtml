@@ -1,0 +1,297 @@
+@model TunisiaStay.ViewModels.ReservationCreateViewModel
+@{
+    ViewData["Title"] = "Réserver une chambre";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var periodes = ViewBag.PeriodesReservees as List<TunisiaStay.ViewModels.PeriodeReserveeViewModel> ?? new();
+    var offresActives = ViewBag.OffresActives as List<TunisiaStay.Models.Offre> ?? new();
+}
+
+@section Styles {
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    text-decoration: line-through;
+    cursor: not-allowed !important;
+}
+.date-input { background-color: #fff !important; cursor: pointer; }
+</style>
+}
+
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fas fa-calendar-check me-2"></i>Finaliser votre Réservation</h1>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mt-1">
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Hotels" asp-action="Index">Hôtels</a></li>
+        <li class="breadcrumb-item active">Réservation</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="form-card">
+        <h4 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:1.5rem;">
+          <i class="fas fa-calendar-alt me-2"></i>Choisir vos dates
+        </h4>
+
+        @if (offresActives.Any())
+        {
+            <div class="alert alert-success mb-3 d-flex align-items-center">
+                <i class="fas fa-tags fa-2x me-3"></i>
+                <div>
+                    <strong>🎉 Offre disponible !</strong>
+                    <div class="small">
+                        @foreach (var o in offresActives)
+                        {
+                            <span class="badge bg-success me-1">-@o.Pourcentage%</span>
+                            <span class="me-2">@o.Titre (jusqu'au @o.DateFin.ToString("dd/MM/yyyy"))</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="alert-danger-custom mb-3"></div>
+        }
+
+        <form asp-action="Create" method="post" id="reservForm">
+          @Html.AntiForgeryToken()
+          <input type="hidden" asp-for="ChambreId" />
+
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <label class="form-label">Date d'arrivée</label>
+              <input asp-for="DateArrivee" type="text" class="form-control date-input" id="dateArrivee" placeholder="Choisir une date" readonly />
+              <span asp-validation-for="DateArrivee" class="text-danger" style="font-size:0.78rem;"></span>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Date de départ</label>
+              <input asp-for="DateDepart" type="text" class="form-control date-input" id="dateDepart" placeholder="Choisir une date" readonly />
+              <span asp-validation-for="DateDepart" class="text-danger" style="font-size:0.78rem;"></span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label asp-for="MethodePaiement" class="form-label">Mode de paiement</label>
+            <div class="row g-3">
+              @foreach (var m in new[] { ("Carte","fa-credit-card"), ("Espèces","fa-money-bill"), ("Virement","fa-university") })
+              {
+                <div class="col-4">
+                  <label style="display:block;border:2px solid #e5e7eb;border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;" id="label_@m.Item1">
+                    <input type="radio" asp-for="MethodePaiement" value="@m.Item1" style="display:none;" onchange="selectMethod(this)" />
+                    <i class="fas @m.Item2" style="font-size:1.5rem;color:var(--gray);display:block;margin-bottom:0.3rem;"></i>
+                    <span style="font-size:0.82rem;font-weight:600;">@m.Item1</span>
+                  </label>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div style="background:var(--light-gray);border-radius:10px;padding:1.3rem;margin-bottom:1.5rem;">
+            <div class="d-flex justify-content-between mb-2" style="font-size:0.9rem;">
+              <span style="color:var(--gray);">Prix / nuit</span>
+              <span>@Model.Chambre?.PrixParNuit.ToString("N0") DT</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2" style="font-size:0.9rem;">
+              <span style="color:var(--gray);">Nombre de nuits</span>
+              <span id="nightsCount">—</span>
+            </div>
+            <div class="d-none justify-content-between mb-2" style="font-size:0.9rem;" id="promoLine">
+              <span style="color:#16a34a;font-weight:600;"><i class="fas fa-tag me-1"></i>Réduction (<span id="promoPct">0</span>%)</span>
+              <span style="color:#16a34a;font-weight:600;" id="promoAmount">—</span>
+            </div>
+            <hr style="border-color:#d1d5db;">
+            <div class="d-flex justify-content-between align-items-baseline">
+              <span style="font-weight:700;color:var(--primary);">Total</span>
+              <div>
+                <span id="originalPrice" style="text-decoration:line-through;color:var(--gray);font-size:0.9rem;margin-right:0.5rem;display:none;"></span>
+                <span style="font-size:1.4rem;font-weight:700;color:var(--primary);font-family:var(--ff-heading);" id="totalPrice">—</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-accent-custom w-100 py-3" style="font-size:1rem;">
+            <i class="fas fa-check-circle me-2"></i>Confirmer la Réservation
+          </button>
+
+          @if (periodes.Any())
+          {
+              <div class="text-muted small mt-2 text-center">
+                  <i class="fas fa-info-circle me-1"></i>
+                  @periodes.Count période(s) déjà réservée(s) — visibles en rouge dans le calendrier.
+              </div>
+          }
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      @if (Model.Chambre != null)
+      {
+        <div class="form-card" style="position:sticky;top:90px;">
+          <h5 style="font-family:var(--ff-heading);color:var(--primary);margin-bottom:1rem;">Votre sélection</h5>
+          @if (!string.IsNullOrEmpty(Model.Chambre.ImagePath))
+          {
+            <img src="@Model.Chambre.ImagePath" alt="@Model.Chambre.Model" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:1rem;" />
+          }
+          else
+          {
+            <div style="height:160px;background:linear-gradient(135deg,var(--primary),#2d6a7f);border-radius:8px;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;">
+              <i class="fas fa-bed" style="font-size:3rem;color:rgba(255,255,255,0.2)"></i>
+            </div>
+          }
+          <h5 style="font-family:var(--ff-heading);">@Model.Chambre.Model</h5>
+          <p style="font-size:0.85rem;color:var(--gray);">
+            <i class="fas fa-hotel me-1"></i>@Model.Chambre.Hotel?.Name<br>
+            <i class="fas fa-map-marker-alt me-1"></i>@Model.Chambre.Hotel?.City
+          </p>
+          <div class="d-flex gap-3 mt-2" style="font-size:0.82rem;color:var(--gray);">
+            <span><i class="fas fa-ruler-combined me-1"></i>@Model.Chambre.Surface m²</span>
+            <span><i class="fas fa-users me-1"></i>@Model.Chambre.Capacite pers.</span>
+            <span><i class="fas fa-layer-group me-1"></i>Étage @Model.Chambre.Etage</span>
+          </div>
+          <div class="mt-3 p-3" style="background:#f0f9ff;border-radius:8px;border-left:3px solid var(--primary);">
+            <div style="font-size:0.8rem;color:var(--gray);">Prix par nuit</div>
+            <div style="font-size:1.5rem;font-weight:700;color:var(--primary);font-family:var(--ff-heading);">
+              @Model.Chambre.PrixParNuit.ToString("N0") DT
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+<script>
+// ── Données injectées par le serveur ──
+const periodesReservees = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    periodes.Select(p => new {
+        debut = p.Debut.ToString("yyyy-MM-dd"),
+        fin = p.Fin.ToString("yyyy-MM-dd")
+    })
+));
+
+const offresActives = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    offresActives.Select(o => new {
+        debut = o.DateDebut.ToString("yyyy-MM-dd"),
+        fin = o.DateFin.ToString("yyyy-MM-dd"),
+        pct = o.Pourcentage
+    })
+));
+
+const pricePerNight = @Model.Chambre?.PrixParNuit;
+
+// ── Génère la liste de TOUTES les dates bloquées ──
+const datesBloquees = [];
+periodesReservees.forEach(p => {
+    const d = new Date(p.debut);
+    const fin = new Date(p.fin);
+    while (d < fin) {
+        datesBloquees.push(d.toISOString().slice(0, 10));
+        d.setDate(d.getDate() + 1);
+    }
+});
+
+// ── Initialisation des calendriers ──
+const fpArrivee = flatpickr('#dateArrivee', {
+    locale: 'fr',
+    dateFormat: 'd/m/Y',
+    minDate: 'today',
+    disable: datesBloquees,
+    onChange: function(selectedDates) {
+        if (selectedDates[0]) {
+            const lendemain = new Date(selectedDates[0]);
+            lendemain.setDate(lendemain.getDate() + 1);
+            fpDepart.set('minDate', lendemain);
+        }
+        calcTotal();
+    }
+});
+
+const fpDepart = flatpickr('#dateDepart', {
+    locale: 'fr',
+    dateFormat: 'd/m/Y',
+    minDate: 'today',
+    disable: datesBloquees,
+    onChange: function() { calcTotal(); }
+});
+
+// ── Trouver la meilleure offre pour une période donnée ──
+function trouverMeilleureOffre(dArr, dDep) {
+    const arrStr = dArr.toISOString().slice(0, 10);
+    const depStr = dDep.toISOString().slice(0, 10);
+    let meilleure = null;
+    offresActives.forEach(o => {
+        if (o.debut <= depStr && o.fin >= arrStr) {
+            if (!meilleure || o.pct > meilleure.pct) meilleure = o;
+        }
+    });
+    return meilleure;
+}
+
+// ── Calcul du prix total avec promo ──
+function calcTotal() {
+    const dArr = fpArrivee.selectedDates[0];
+    const dDep = fpDepart.selectedDates[0];
+
+    const promoLine = document.getElementById('promoLine');
+    const originalPrice = document.getElementById('originalPrice');
+    const totalEl = document.getElementById('totalPrice');
+
+    if (!dArr || !dDep || dDep <= dArr) return;
+
+    const nights = Math.round((dDep - dArr) / 86400000);
+    const sousTotal = nights * pricePerNight;
+    const offre = trouverMeilleureOffre(dArr, dDep);
+
+    document.getElementById('nightsCount').textContent = nights + ' nuit(s)';
+
+    if (offre) {
+        const reduction = sousTotal * offre.pct / 100;
+        const totalApresReduc = sousTotal - reduction;
+
+        promoLine.classList.remove('d-none');
+        promoLine.classList.add('d-flex');
+        document.getElementById('promoPct').textContent = offre.pct;
+        document.getElementById('promoAmount').textContent = '-' + reduction.toLocaleString('fr-TN') + ' DT';
+
+        originalPrice.style.display = 'inline';
+        originalPrice.textContent = sousTotal.toLocaleString('fr-TN') + ' DT';
+        totalEl.textContent = totalApresReduc.toLocaleString('fr-TN') + ' DT';
+        totalEl.style.color = '#16a34a';
+    } else {
+        promoLine.classList.remove('d-flex');
+        promoLine.classList.add('d-none');
+        originalPrice.style.display = 'none';
+        totalEl.textContent = sousTotal.toLocaleString('fr-TN') + ' DT';
+        totalEl.style.color = 'var(--primary)';
+    }
+}
+
+// ── Sélection visuelle du mode de paiement ──
+function selectMethod(radio) {
+    document.querySelectorAll('[id^="label_"]').forEach(l => {
+        l.style.borderColor = '#e5e7eb';
+        l.style.background = 'white';
+    });
+    const lbl = document.getElementById('label_' + radio.value);
+    if (lbl) {
+        lbl.style.borderColor = 'var(--primary)';
+        lbl.style.background = '#f0f9ff';
+    }
+}
+document.querySelector('[name="MethodePaiement"]').click();
+</script>
+}

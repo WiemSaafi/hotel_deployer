@@ -1,0 +1,67 @@
+@* ════════ ChambresAdmin/Index ════════ *@
+@model IEnumerable<TunisiaStay.Models.Chambre>
+@{
+    ViewData["Title"] = "Gestion des Chambres";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:var(--ff-heading);color:var(--primary);margin:0;">Chambres</h5>
+        <p style="font-size:0.82rem;color:var(--gray);margin:0;">@Model.Count() chambre(s) enregistrée(s)</p>
+    </div>
+    <a asp-area="Admin" asp-controller="ChambresAdmin" asp-action="Create" class="btn btn-primary-custom">
+        <i class="fas fa-plus me-2"></i>Ajouter une Chambre
+    </a>
+</div>
+
+<div class="form-card p-0" style="overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Chambre</th><th>Hôtel</th><th>Surface</th><th>Capacité</th>
+                    <th>Prix / nuit</th><th>Étage</th><th>Disponible</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;color:var(--primary);">@c.Model</div>
+                            <div style="font-size:0.75rem;color:var(--gray);">ID: @c.IdChambre</div>
+                        </td>
+                        <td style="font-size:0.88rem;">@c.Hotel?.Name</td>
+                        <td>@c.Surface m²</td>
+                        <td><i class="fas fa-users me-1" style="color:var(--gray);font-size:0.75rem;"></i>@c.Capacite</td>
+                        <td>
+                            <span style="font-weight:700;color:var(--primary);">@c.PrixParNuit.ToString("N0") DT</span>
+                        </td>
+                        <td>@c.Etage</td>
+                        <td>
+                            <span style="font-size:0.78rem;font-weight:600;color:@(c.Disponible ? "var(--success)" : "var(--danger)");">
+                                <i class="fas fa-circle me-1" style="font-size:0.5rem;"></i>@(c.Disponible ? "Oui" : "Non")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-area="Admin" asp-controller="ChambresAdmin" asp-action="Edit" asp-route-id="@c.IdChambre"
+                                   class="btn btn-sm btn-outline-primary-custom" style="padding:0.3rem 0.7rem;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-area="Admin" asp-controller="ChambresAdmin" asp-action="Delete" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@c.IdChambre" />
+                                    <button class="btn btn-sm btn-danger" style="padding:0.3rem 0.7rem;"
+                                            onclick="return confirm('Supprimer cette chambre ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

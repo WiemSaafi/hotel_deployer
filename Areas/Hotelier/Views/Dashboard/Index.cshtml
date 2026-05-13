@@ -1,0 +1,155 @@
+@model TunisiaStay.Models.Hotel
+@using TunisiaStay.ViewModels
+@{
+    ViewData["Title"] = "Espace Hôtelier";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Tableau de bord</h1>
+            <p class="text-muted mb-0"><i class="fas fa-hotel me-1"></i>@Model.Name — @Model.City</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- Stat cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card text-center p-3 h-100" style="border-left:4px solid #1a3a4a;">
+                <div class="text-muted small text-uppercase">Chambres</div>
+                <h2 class="mb-0">@ViewBag.NbChambres</h2>
+                <i class="fas fa-bed text-muted small mt-1"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card text-center p-3 h-100" style="border-left:4px solid #d97706;">
+                <div class="text-muted small text-uppercase">En attente</div>
+                <h2 class="mb-0 @(ViewBag.NbReservationsEnAttente > 0 ? "text-warning" : "")">@ViewBag.NbReservationsEnAttente</h2>
+                <i class="fas fa-clock text-muted small mt-1"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card text-center p-3 h-100" style="border-left:4px solid #16a34a;">
+                <div class="text-muted small text-uppercase">Réserv. ce mois</div>
+                <h2 class="mb-0">@ViewBag.NbReservationsCeMois</h2>
+                <i class="fas fa-calendar-check text-muted small mt-1"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card text-center p-3 h-100" style="border-left:4px solid #c9a85c;">
+                <div class="text-muted small text-uppercase">Revenu total</div>
+                <h2 class="mb-0">@(((double)ViewBag.RevenuTotal).ToString("N0"))<small class="text-muted" style="font-size:0.7rem;"> DT</small></h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique + Top 3 -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card p-4 h-100">
+                <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Revenus des 6 derniers mois</h5>
+                <canvas id="revenuChart" height="80"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card p-4 h-100">
+                <h5 class="mb-3"><i class="fas fa-trophy me-2"></i>Top chambres</h5>
+                @{
+                    var topList = ViewBag.TopChambres as IEnumerable<ChambreTopDto>;
+                }
+                @if (topList != null && topList.Any())
+                {
+                    var rang = 1;
+                    foreach (var t in topList)
+                    {
+                        var couleur = rang == 1 ? "#c9a85c" : rang == 2 ? "#9ca3af" : "#cd7f32";
+                        <div class="d-flex align-items-center mb-2">
+                            <span style="width:28px;height:28px;border-radius:50%;background:@couleur;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:0.7rem;">@rang</span>
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold">@t.Chambre.Model</div>
+                                <div class="text-muted" style="font-size:0.75rem;">@t.NbReservations réservation(s)</div>
+                            </div>
+                        </div>
+                        rang++;
+                    }
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Aucune donnée pour le moment.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <h5 class="mb-3 mt-4">Actions rapides</h5>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-area="Hotelier" asp-controller="Chambres" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-bed me-1"></i> Gérer mes chambres
+        </a>
+        <a asp-area="Hotelier" asp-controller="Reservations" asp-action="Index" class="btn btn-warning">
+            <i class="fas fa-calendar-check me-1"></i> Voir les réservations
+            @if (ViewBag.NbReservationsEnAttente > 0)
+            {
+                <span class="badge bg-danger ms-1">@ViewBag.NbReservationsEnAttente</span>
+            }
+        </a>
+        <a asp-area="Hotelier" asp-controller="Offres" asp-action="Index" class="btn btn-success">
+            <i class="fas fa-tags me-1"></i> Mes offres
+        </a>
+        <a asp-area="Hotelier" asp-controller="MonHotel" asp-action="Edit" class="btn btn-outline-secondary">
+            <i class="fas fa-edit me-1"></i> Modifier infos hôtel
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.LabelsMois));
+const revenus = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.RevenusMois));
+
+new Chart(document.getElementById('revenuChart'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Revenus (DT)',
+            data: revenus,
+            borderColor: '#16a34a',
+            backgroundColor: 'rgba(22, 163, 74, 0.15)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#16a34a',
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.parsed.y.toLocaleString('fr-TN') + ' DT'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: v => v.toLocaleString('fr-TN') + ' DT' },
+                grid: { color: '#f3f4f6' }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+}

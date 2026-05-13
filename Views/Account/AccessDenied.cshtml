@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Accès refusé";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;">
+  <div>
+    <i class="fas fa-lock" style="font-size:5rem;color:var(--danger);margin-bottom:1.5rem;display:block;opacity:0.4;"></i>
+    <h2 style="font-family:var(--ff-heading);color:var(--primary);">Accès Refusé</h2>
+    <p style="color:var(--gray);max-width:400px;margin:1rem auto;">
+      Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary-custom mt-2">
+      <i class="fas fa-home me-2"></i>Retour à l'accueil
+    </a>
+  </div>
+</div>

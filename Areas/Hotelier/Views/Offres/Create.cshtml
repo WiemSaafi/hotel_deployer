@@ -1,0 +1,57 @@
+@model TunisiaStay.Models.Offre
+@{
+    ViewData["Title"] = "Nouvelle offre";
+}
+
+<div class="container py-5">
+    <h1><i class="fas fa-plus-circle me-2"></i>Créer une offre — @ViewBag.HotelName</h1>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger mt-3"></div>
+    }
+
+    <form asp-action="Create" method="post" class="card p-4 mt-4" style="max-width:700px;">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="Titre" class="form-label">Titre de l'offre</label>
+            <input asp-for="Titre" class="form-control" placeholder="Ex: Promo Été 2026" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description (optionnelle)</label>
+            <textarea asp-for="Description" class="form-control" rows="3"
+                      placeholder="Ex: Profitez de l'été en Tunisie avec -20% sur toutes nos chambres"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Pourcentage" class="form-label">Pourcentage de réduction (%)</label>
+            <input asp-for="Pourcentage" type="number" min="1" max="90" class="form-control" />
+            <small class="text-muted">Entre 1 et 90%</small>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="DateDebut" class="form-label">Date de début</label>
+                <input asp-for="DateDebut" type="date" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="DateFin" class="form-label">Date de fin</label>
+                <input asp-for="DateFin" type="date" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Offre active</label>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i> Créer l'offre
+            </button>
+        </div>
+    </form>
+</div>

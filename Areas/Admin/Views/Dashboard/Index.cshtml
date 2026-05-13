@@ -1,0 +1,196 @@
+@model TunisiaStay.ViewModels.StatisticsViewModel
+@{
+    ViewData["Title"] = "Tableau de Bord";
+}
+
+<!-- ── Stat Cards ─────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card position-relative">
+            <div class="stat-label">Hôtels Actifs</div>
+            <div class="stat-value">@Model.TotalHotels</div>
+            <i class="fas fa-hotel stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card gold position-relative">
+            <div class="stat-label">Chambres</div>
+            <div class="stat-value">@Model.TotalChambres</div>
+            <i class="fas fa-bed stat-icon" style="color:var(--accent)"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card terracotta position-relative">
+            <div class="stat-label">Clients</div>
+            <div class="stat-value">@Model.TotalClients</div>
+            <i class="fas fa-users stat-icon" style="color:var(--terracotta)"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card teal position-relative">
+            <div class="stat-label">Réservations</div>
+            <div class="stat-value">@Model.TotalReservations</div>
+            <i class="fas fa-calendar-check stat-icon" style="color:#0d9488"></i>
+        </div>
+    </div>
+</div>
+
+<!-- ── Revenue + Statut cards ─────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="form-card h-100 text-center">
+            <i class="fas fa-coins" style="font-size:2rem;color:var(--accent);margin-bottom:0.6rem;display:block;"></i>
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray);">Revenu Total Confirmé</div>
+            <div style="font-size:2.5rem;font-weight:700;font-family:var(--ff-heading);color:var(--primary);">
+                @Model.RevenuTotal.ToString("N0") <span style="font-size:1rem;color:var(--gray);">DT</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="form-card h-100">
+            <h6 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin-bottom:1rem;">Statut des Réservations</h6>
+            <div class="row g-3 text-center">
+                <div class="col-4">
+                    <div style="font-size:1.8rem;font-weight:700;color:#d97706;font-family:var(--ff-heading);">@Model.ReservationsEnAttente</div>
+                    <div style="font-size:0.78rem;color:var(--gray);">En attente</div>
+                    <div style="height:4px;background:#fef3c7;border-radius:2px;margin-top:6px;">
+                        @{ var total = Model.TotalReservations > 0 ? Model.TotalReservations : 1; }
+                        <div style="width:@((Model.ReservationsEnAttente * 100 / total))%;height:4px;background:#d97706;border-radius:2px;"></div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div style="font-size:1.8rem;font-weight:700;color:var(--success);font-family:var(--ff-heading);">@Model.ReservationsConfirmees</div>
+                    <div style="font-size:0.78rem;color:var(--gray);">Confirmées</div>
+                    <div style="height:4px;background:#d1fae5;border-radius:2px;margin-top:6px;">
+                        <div style="width:@((Model.ReservationsConfirmees * 100 / total))%;height:4px;background:var(--success);border-radius:2px;"></div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div style="font-size:1.8rem;font-weight:700;color:var(--danger);font-family:var(--ff-heading);">@Model.ReservationsAnnulees</div>
+                    <div style="font-size:0.78rem;color:var(--gray);">Annulées</div>
+                    <div style="height:4px;background:#fee2e2;border-radius:2px;margin-top:6px;">
+                        <div style="width:@((Model.ReservationsAnnulees * 100 / total))%;height:4px;background:var(--danger);border-radius:2px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Charts ─────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="form-card">
+            <h6 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin-bottom:1rem;">
+                <i class="fas fa-chart-pie me-2"></i>Réservations par Ville
+            </h6>
+            <canvas id="cityChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-card">
+            <h6 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin-bottom:1rem;">
+                <i class="fas fa-chart-bar me-2"></i>Statut des réservations
+            </h6>
+            <canvas id="statutChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ── Top Hotels table ───────────────────────────────────────────── -->
+<div class="form-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin:0;">
+            <i class="fas fa-trophy me-2"></i>Top Hôtels (par réservations)
+        </h6>
+        <a asp-area="Admin" asp-controller="HotelsAdmin" asp-action="Index"
+           class="btn btn-sm btn-outline-primary-custom">Voir tous</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>Hôtel</th>
+                    <th>Ville</th>
+                    <th>Classification</th>
+                    <th>Chambres</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model.TopHotels)
+                {
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;color:var(--primary);">@h.Name</div>
+                        </td>
+                        <td><i class="fas fa-map-marker-alt me-1" style="color:var(--terracotta)"></i>@h.City</td>
+                        <td>
+                            <span style="font-size:0.82rem;color:var(--accent);font-weight:600;">@h.Classification</span>
+                        </td>
+                        <td>
+                            <span class="badge" style="background:var(--primary);color:#fff;">@h.Chambres.Count</span>
+                        </td>
+                        <td style="font-size:0.85rem;color:var(--gray);">@h.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ── Quick actions ──────────────────────────────────────────────── -->
+<div class="row g-3 mt-2">
+    @foreach (var action in new[] {
+        ("fa-hotel","Ajouter un Hôtel","Admin","HotelsAdmin","Create","var(--primary)"),
+        ("fa-bed","Ajouter une Chambre","Admin","ChambresAdmin","Create","var(--accent)"),
+        ("fa-calendar-check","Voir Réservations","Admin","ReservationsAdmin","Index","var(--terracotta)"),
+        ("fa-users","Voir Clients","Admin","ClientsAdmin","Index","#0d9488")
+    })
+    {
+        <div class="col-6 col-md-3">
+            <a asp-area="@action.Item3" asp-controller="@action.Item4" asp-action="@action.Item5"
+               style="display:block;background:#fff;border-radius:var(--radius);padding:1.3rem;text-align:center;box-shadow:var(--shadow);text-decoration:none;transition:all var(--transition);"
+               onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+                <i class="fas @action.Item1" style="font-size:1.8rem;color:@action.Item6;display:block;margin-bottom:0.5rem;"></i>
+                <div style="font-size:0.85rem;font-weight:600;color:var(--dark);">@action.Item2</div>
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+// City chart
+const cityLabels = [@Html.Raw(string.Join(",", Model.ReservationsParVille.Select(x => $"'{x.City}'")))];
+const cityData   = [@Html.Raw(string.Join(",", Model.ReservationsParVille.Select(x => x.Count)))];
+
+new Chart(document.getElementById('cityChart'), {
+    type: 'doughnut',
+    data: {
+        labels: cityLabels.length ? cityLabels : ['Aucune donnée'],
+        datasets: [{ data: cityData.length ? cityData : [1],
+            backgroundColor: ['#1a3a4a','#c9a85c','#c05a2e','#0d9488','#6366f1'],
+            borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '65%' }
+});
+
+// Statut chart
+new Chart(document.getElementById('statutChart'), {
+    type: 'bar',
+    data: {
+        labels: ['En attente', 'Confirmées', 'Annulées'],
+        datasets: [{ label: 'Réservations',
+            data: [@Model.ReservationsEnAttente, @Model.ReservationsConfirmees, @Model.ReservationsAnnulees],
+            backgroundColor: ['#fef3c7','#d1fae5','#fee2e2'],
+            borderColor: ['#d97706','#16a34a','#dc2626'],
+            borderWidth: 2, borderRadius: 6 }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+    }
+});
+</script>
+}

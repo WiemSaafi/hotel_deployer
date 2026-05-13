@@ -1,0 +1,157 @@
+@model IEnumerable<TunisiaStay.Models.Reservation>
+@{
+    ViewData["Title"] = "Réservations";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Réservations — @ViewBag.HotelName</h1>
+            <p class="text-muted mb-0">
+                <span class="badge bg-warning text-dark me-2">@ViewBag.NbEnAttente en attente</span>
+                <span class="badge bg-success">@ViewBag.NbConfirmees confirmées</span>
+            </p>
+        </div>
+        <a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- Filtres -->
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-sm @(ViewBag.StatutFiltre == null ? "btn-primary" : "btn-outline-primary")">
+            Toutes
+        </a>
+        <a asp-action="Index" asp-route-statut="En attente" class="btn btn-sm @(ViewBag.StatutFiltre == "En attente" ? "btn-warning" : "btn-outline-warning")">
+            En attente
+        </a>
+        <a asp-action="Index" asp-route-statut="Confirmée" class="btn btn-sm @(ViewBag.StatutFiltre == "Confirmée" ? "btn-success" : "btn-outline-success")">
+            Confirmées
+        </a>
+        <a asp-action="Index" asp-route-statut="Annulée" class="btn btn-sm @(ViewBag.StatutFiltre == "Annulée" ? "btn-danger" : "btn-outline-danger")">
+            Annulées
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+            <p class="mb-0">Aucune réservation @(ViewBag.StatutFiltre != null ? "avec ce statut" : "pour le moment").</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Client</th>
+                        <th>Chambre</th>
+                        <th>Dates</th>
+                        <th>Durée</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@r.Id" class="text-decoration-none">
+                                    <strong>#@r.Id</strong>
+                                    <i class="fas fa-external-link-alt ms-1" style="font-size:0.7rem;"></i>
+                                </a>
+                            </td>
+                            <td>
+                                @if (r.Client != null)
+                                {
+                                    <div>@r.Client.Prénom @r.Client.Nom</div>
+                                    <small class="text-muted">@r.Client.Email</small><br />
+                                    <small class="text-muted">📞 @r.Client.Telephone</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Inconnu</span>
+                                }
+                            </td>
+                            <td>
+                                @if (r.Chambre != null)
+                                {
+                                    <div>@r.Chambre.Model</div>
+                                    <small class="text-muted">Étage @r.Chambre.Etage</small>
+                                }
+                            </td>
+                            <td>
+                                <div><i class="fas fa-calendar-check text-success me-1"></i>@r.Date.ToString("dd/MM/yyyy")</div>
+                                <div><i class="fas fa-calendar-times text-danger me-1"></i>@r.Date.AddDays(r.Durée).ToString("dd/MM/yyyy")</div>
+                            </td>
+                            <td>@r.Durée nuit(s)</td>
+                            <td><strong>@r.Prix.ToString("N0") DT</strong></td>
+                            <td>
+                                @switch (r.Statut)
+                                {
+                                    case "En attente":
+                                        <span class="badge bg-warning text-dark">En attente</span>
+                                        break;
+                                    case "Confirmée":
+                                        <span class="badge bg-success">Confirmée</span>
+                                        break;
+                                    case "Annulée":
+                                        <span class="badge bg-danger">Annulée</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@r.Statut</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-outline-info me-1" title="Détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if (r.Statut == "En attente")
+                                {
+                                    <form asp-action="Confirm" asp-route-id="@r.Id" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-success" title="Confirmer">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Refuse" asp-route-id="@r.Id" method="post" style="display:inline"
+                                          onsubmit="return confirm('Refuser cette réservation ?');">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-danger" title="Refuser">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else if (r.Statut == "Confirmée")
+                                {
+                                    <form asp-action="Refuse" asp-route-id="@r.Id" method="post" style="display:inline"
+                                          onsubmit="return confirm('Annuler cette réservation confirmée ?');">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-outline-danger" title="Annuler">
+                                            <i class="fas fa-ban"></i> Annuler
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

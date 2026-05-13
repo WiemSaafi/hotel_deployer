@@ -1,0 +1,123 @@
+@model TunisiaStay.Models.Hotel
+@{
+    ViewData["Title"] = "Modifier mon hôtel";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Modifier les infos de mon hôtel</h1>
+        <a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- Colonne gauche : infos -->
+            <div class="col-md-7">
+                <div class="card p-4 mb-3">
+                    <h5 class="mb-3"><i class="fas fa-hotel me-2"></i>Informations principales</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Nom de l'hôtel</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Classification" class="form-label">Classification</label>
+                            <select asp-for="Classification" class="form-select">
+                                <option value="3 étoiles">3 étoiles</option>
+                                <option value="4 étoiles">4 étoiles</option>
+                                <option value="5 étoiles">5 étoiles</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="City" class="form-label">Ville</label>
+                            <input asp-for="City" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label">Adresse complète</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="card p-4">
+                    <h5 class="mb-3"><i class="fas fa-phone me-2"></i>Contact</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NumContact" class="form-label">Téléphone</label>
+                            <input asp-for="NumContact" type="number" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : image + GPS -->
+            <div class="col-md-5">
+                <div class="card p-4 mb-3">
+                    <h5 class="mb-3"><i class="fas fa-image me-2"></i>Photo principale</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="ImagePath" class="form-label">URL de l'image</label>
+                        <input asp-for="ImagePath" class="form-control" placeholder="https://..." />
+                        <small class="text-muted">Coller une URL d'image (ex: depuis Unsplash)</small>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath" class="img-fluid rounded mt-2"
+                             style="max-height:200px;object-fit:cover;" />
+                    }
+                </div>
+
+                <div class="card p-4">
+                    <h5 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Coordonnées GPS</h5>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label asp-for="Latitude" class="form-label">Latitude</label>
+                            <input asp-for="Latitude" type="number" step="0.0001" class="form-control" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label asp-for="Longitude" class="form-label">Longitude</label>
+                            <input asp-for="Longitude" type="number" step="0.0001" class="form-control" />
+                        </div>
+                    </div>
+                    <small class="text-muted">Tu peux trouver les coordonnées sur Google Maps : clic droit → coordonnées</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end mt-4">
+            <a asp-area="Hotelier" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                Annuler
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Enregistrer les modifications
+            </button>
+        </div>
+    </form>
+</div>
