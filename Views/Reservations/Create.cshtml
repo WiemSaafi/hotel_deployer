@@ -60,7 +60,7 @@
 
         @if (!ViewData.ModelState.IsValid)
         {
-            <div asp-validation-summary="All" class="alert-danger-custom mb-3"></div>
+            <div asp-validation-summary="All" class="alert-danger-custom mb-3" style="display:none;"></div>
         }
 
         <form asp-action="Create" method="post" id="reservForm">
@@ -207,7 +207,9 @@ periodesReservees.forEach(p => {
 // ── Initialisation des calendriers ──
 const fpArrivee = flatpickr('#dateArrivee', {
     locale: 'fr',
-    dateFormat: 'd/m/Y',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
     minDate: 'today',
     disable: datesBloquees,
     onChange: function(selectedDates) {
@@ -222,7 +224,9 @@ const fpArrivee = flatpickr('#dateArrivee', {
 
 const fpDepart = flatpickr('#dateDepart', {
     locale: 'fr',
-    dateFormat: 'd/m/Y',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
     minDate: 'today',
     disable: datesBloquees,
     onChange: function() { calcTotal(); }
